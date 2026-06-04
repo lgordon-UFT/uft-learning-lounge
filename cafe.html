@@ -1,0 +1,1384 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Question Café — UFT Learning Lounge</title>
+  <meta name="description" content="The UFT Learning Lounge Question Café — a community space where UFT staff can pose AI questions, share discoveries, and learn from each other."/>
+  <link rel="stylesheet" href="style.css"/>
+  <style>
+    /* ── CAFE HERO ── */
+    .cafe-hero {
+      background: linear-gradient(135deg, #3d2006 0%, #6b3a0d 40%, #8b5010 100%);
+      padding: clamp(var(--space-12), 7vw, var(--space-20)) 0;
+      position: relative; overflow: hidden;
+    }
+    .cafe-hero::before {
+      content: ''; position: absolute; inset: 0;
+      background-image:
+        radial-gradient(circle at 20% 50%, rgba(200,164,32,0.15) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(255,255,255,0.05) 0%, transparent 40%);
+    }
+    .cafe-hero-inner { position: relative; display: grid; grid-template-columns: 1fr auto; gap: var(--space-10); align-items: center; }
+    @media (max-width: 700px) { .cafe-hero-inner { grid-template-columns: 1fr; } .cafe-hero-art { display: none; } }
+
+    .cafe-hero-eyebrow {
+      display: inline-flex; align-items: center; gap: var(--space-2);
+      background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+      border-radius: var(--radius-full); padding: var(--space-2) var(--space-4);
+      font-size: var(--text-xs); font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em;
+      color: var(--color-primary-mid); margin-bottom: var(--space-4);
+    }
+    .cafe-hero h1 { font-family: var(--font-display); font-size: var(--text-2xl); font-weight: 900; color: #fff; margin-bottom: var(--space-3); }
+    .cafe-hero p  { font-size: var(--text-base); color: rgba(255,255,255,0.75); max-width: 52ch; line-height: 1.7; }
+    .cafe-hero-art { font-size: 100px; line-height: 1; text-align: center; filter: drop-shadow(0 8px 32px rgba(0,0,0,0.4)); }
+
+    /* ── MAIN LAYOUT ── */
+    .cafe-layout {
+      display: grid;
+      grid-template-columns: 1fr 360px;
+      gap: var(--space-10);
+      padding-block: clamp(var(--space-10), 5vw, var(--space-16));
+      align-items: start;
+    }
+    @media (max-width: 960px) { .cafe-layout { grid-template-columns: 1fr; } }
+
+    /* ── ASK A QUESTION ── */
+    .ask-card {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-2xl);
+      overflow: hidden;
+      margin-bottom: var(--space-8);
+    }
+    .ask-card-head {
+      background: linear-gradient(135deg, var(--color-uft), #0057a8);
+      padding: var(--space-6) var(--space-7);
+      display: flex; align-items: center; gap: var(--space-4);
+    }
+    .ask-card-head h2 { font-family: var(--font-display); font-size: var(--text-lg); font-weight: 800; color: #fff; }
+    .ask-card-head p  { font-size: var(--text-sm); color: rgba(255,255,255,0.7); margin-top: var(--space-1); }
+    .ask-card-icon-lg { font-size: 36px; }
+    .ask-form { padding: var(--space-7); display: flex; flex-direction: column; gap: var(--space-5); }
+
+    .category-picker { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-1); }
+    .cat-btn {
+      display: inline-flex; align-items: center; gap: var(--space-2);
+      padding: var(--space-2) var(--space-3);
+      background: var(--color-surface-offset); border: 1.5px solid var(--color-border);
+      border-radius: var(--radius-full); font-size: var(--text-xs); font-weight: 600;
+      color: var(--color-text-muted); cursor: pointer;
+      transition: background var(--tx), border-color var(--tx), color var(--tx);
+    }
+    .cat-btn:hover, .cat-btn.active {
+      background: var(--color-primary-light); border-color: var(--color-primary);
+      color: var(--color-primary-hover);
+    }
+
+    .form-actions { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: var(--space-3); }
+    .form-note { font-size: var(--text-xs); color: var(--color-text-faint); }
+
+    /* ── QUESTIONS FEED ── */
+    .feed-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: var(--space-6); flex-wrap: wrap; gap: var(--space-3);
+    }
+    .feed-header h2 { font-family: var(--font-display); font-size: var(--text-lg); font-weight: 800; }
+
+    .feed-filters { display: flex; gap: var(--space-2); flex-wrap: wrap; }
+    .filter-btn {
+      padding: var(--space-2) var(--space-4);
+      background: var(--color-surface); border: 1.5px solid var(--color-border);
+      border-radius: var(--radius-full); font-size: var(--text-xs); font-weight: 600;
+      color: var(--color-text-muted); cursor: pointer;
+      transition: all var(--tx);
+    }
+    .filter-btn.active, .filter-btn:hover {
+      background: var(--color-primary-light); border-color: var(--color-primary);
+      color: var(--color-primary-hover);
+    }
+
+    /* question card */
+    .q-card {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-xl);
+      padding: var(--space-5) var(--space-6);
+      margin-bottom: var(--space-4);
+      transition: box-shadow var(--tx), transform var(--tx);
+      cursor: pointer;
+    }
+    .q-card:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); }
+
+    .q-card.featured { border-color: var(--color-primary); border-left-width: 4px; }
+    .q-card.answered { border-color: var(--color-success); }
+
+    .q-card-meta {
+      display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap;
+      margin-bottom: var(--space-3);
+    }
+    .q-avatar {
+      width: 32px; height: 32px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: var(--text-xs); font-weight: 800; color: #fff; flex-shrink: 0;
+    }
+    .q-meta-text { flex: 1; }
+    .q-author { font-size: var(--text-sm); font-weight: 700; color: var(--color-text); line-height: 1.2; }
+    .q-dept   { font-size: var(--text-xs); color: var(--color-text-muted); }
+    .q-time   { font-size: var(--text-xs); color: var(--color-text-faint); }
+
+    .q-text {
+      font-size: var(--text-base); font-weight: 600; color: var(--color-text);
+      line-height: 1.5; margin-bottom: var(--space-4); max-width: none;
+    }
+
+    .q-card-footer {
+      display: flex; align-items: center; gap: var(--space-4); flex-wrap: wrap;
+    }
+
+    .q-vote-btn {
+      display: flex; align-items: center; gap: var(--space-2);
+      background: var(--color-surface-offset); border: 1px solid var(--color-border);
+      border-radius: var(--radius-full); padding: var(--space-1) var(--space-3);
+      font-size: var(--text-xs); font-weight: 700; color: var(--color-text-muted);
+      cursor: pointer; transition: all var(--tx);
+    }
+    .q-vote-btn:hover, .q-vote-btn.voted {
+      background: var(--color-primary-light); border-color: var(--color-primary);
+      color: var(--color-primary-hover);
+    }
+    .q-answers-count {
+      font-size: var(--text-xs); color: var(--color-text-muted); font-weight: 600;
+      display: flex; align-items: center; gap: var(--space-2);
+    }
+    .q-answers-count.has-answers { color: var(--color-success); }
+
+    .q-featured-badge {
+      display: inline-flex; align-items: center; gap: var(--space-1);
+      font-size: var(--text-xs); font-weight: 700; color: var(--color-primary-hover);
+      background: var(--color-primary-light); border-radius: var(--radius-full);
+      padding: 2px 10px;
+    }
+    .q-answered-badge {
+      display: inline-flex; align-items: center; gap: var(--space-1);
+      font-size: var(--text-xs); font-weight: 700; color: var(--color-success);
+      background: var(--color-success-light); border-radius: var(--radius-full);
+      padding: 2px 10px;
+    }
+
+    /* answer preview */
+    .q-answer-preview {
+      background: var(--color-surface-offset);
+      border-radius: var(--radius-lg); padding: var(--space-4);
+      margin-top: var(--space-4); border-left: 3px solid var(--color-success);
+    }
+    .q-answer-label { font-size: var(--text-xs); font-weight: 700; color: var(--color-success); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: var(--space-2); }
+    .q-answer-text { font-size: var(--text-sm); color: var(--color-text-muted); line-height: 1.65; max-width: none; }
+
+    /* ── SIDEBAR ── */
+    .cafe-sidebar { display: flex; flex-direction: column; gap: var(--space-6); }
+
+    .sidebar-card {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-xl);
+      padding: var(--space-6);
+    }
+    .sidebar-card h3 {
+      font-family: var(--font-display); font-size: var(--text-base); font-weight: 800;
+      margin-bottom: var(--space-4); display: flex; align-items: center; gap: var(--space-2);
+    }
+
+    .rules-list { list-style: none; display: flex; flex-direction: column; gap: var(--space-3); }
+    .rules-list li { display: flex; gap: var(--space-3); align-items: flex-start; font-size: var(--text-sm); color: var(--color-text-muted); line-height: 1.55; }
+    .rules-list li span:first-child { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+
+    .trending-list { display: flex; flex-direction: column; gap: var(--space-3); }
+    .trending-item {
+      display: flex; gap: var(--space-3); align-items: flex-start;
+      text-decoration: none; color: var(--color-text); transition: color var(--tx);
+    }
+    .trending-item:hover { color: var(--color-primary); }
+    .trending-num { font-family: var(--font-display); font-size: var(--text-xs); font-weight: 900; color: var(--color-text-faint); width: 20px; flex-shrink: 0; margin-top: 3px; }
+    .trending-q { font-size: var(--text-sm); font-weight: 600; line-height: 1.45; flex: 1; }
+
+    .dept-list { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+
+    /* ── CAFE RULES TOP STRIP ── */
+    .cafe-rules-strip {
+      background: var(--color-primary-light);
+      border-bottom: 1px solid var(--color-primary);
+      padding: var(--space-3) 0;
+    }
+    .cafe-rules-inner {
+      display: flex; align-items: center; gap: var(--space-6); flex-wrap: wrap;
+      font-size: var(--text-sm); color: var(--color-primary-hover);
+    }
+    .cafe-rules-inner strong { font-weight: 700; }
+    .rule-chip {
+      display: flex; align-items: center; gap: var(--space-2); font-weight: 500;
+    }
+
+     /* avatar colors */
+    .av-1 { background: #b8920e; }
+    .av-2 { background: #1e8ab8; }
+    .av-3 { background: #3d7a1e; }
+    .av-4 { background: #7c3aed; }
+    .av-5 { background: #c2390d; }
+    .av-6 { background: #0d6799; }
+
+    /* ══════════════════════════════════════════
+       LOUNGE ASSISTANT — FLOATING CHAT WIDGET
+    ══════════════════════════════════════════ */
+
+    /* FAB trigger button */
+    .agent-fab {
+      position: fixed;
+      bottom: 28px; right: 28px;
+      z-index: 500;
+      width: 60px; height: 60px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--color-uft), #0057a8);
+      border: 3px solid var(--color-primary-mid);
+      box-shadow: 0 6px 24px rgba(0,40,85,0.45), 0 0 0 0 rgba(200,164,32,0.5);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; color: #fff;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      animation: fab-pulse 3s ease-in-out infinite;
+    }
+    .agent-fab:hover {
+      transform: scale(1.08);
+      box-shadow: 0 8px 32px rgba(0,40,85,0.55), 0 0 0 8px rgba(200,164,32,0.15);
+    }
+    .agent-fab.open { animation: none; background: linear-gradient(135deg, #3d2006, #6b3a0d); border-color: rgba(255,255,255,0.3); }
+
+    @keyframes fab-pulse {
+      0%, 100% { box-shadow: 0 6px 24px rgba(0,40,85,0.45), 0 0 0 0 rgba(200,164,32,0.5); }
+      50%       { box-shadow: 0 6px 24px rgba(0,40,85,0.45), 0 0 0 10px rgba(200,164,32,0); }
+    }
+
+    .agent-fab-icon-open  { display: flex; }
+    .agent-fab-icon-close { display: none; }
+    .agent-fab.open .agent-fab-icon-open  { display: none; }
+    .agent-fab.open .agent-fab-icon-close { display: flex; }
+
+    /* Tooltip label on FAB */
+    .agent-fab-label {
+      position: absolute;
+      right: 70px; bottom: 50%;
+      transform: translateY(50%);
+      background: var(--color-uft);
+      color: #fff;
+      font-size: var(--text-xs);
+      font-weight: 700;
+      white-space: nowrap;
+      padding: var(--space-2) var(--space-4);
+      border-radius: var(--radius-full);
+      box-shadow: var(--shadow-md);
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+    .agent-fab:hover .agent-fab-label { opacity: 1; }
+    .agent-fab.open .agent-fab-label  { display: none; }
+
+    /* Chat window */
+    .agent-window {
+      position: fixed;
+      bottom: 100px; right: 28px;
+      z-index: 499;
+      width: min(420px, calc(100vw - 32px));
+      height: min(580px, calc(100dvh - 140px));
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-2xl);
+      box-shadow: var(--shadow-xl);
+      display: flex; flex-direction: column;
+      overflow: hidden;
+      transform: scale(0.92) translateY(16px);
+      opacity: 0;
+      pointer-events: none;
+      transform-origin: bottom right;
+      transition: transform 0.25s cubic-bezier(0.16,1,0.3,1), opacity 0.2s ease;
+    }
+    .agent-window.open {
+      transform: scale(1) translateY(0);
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    /* Window header */
+    .agent-header {
+      background: linear-gradient(135deg, var(--color-uft), #004a9a);
+      padding: var(--space-4) var(--space-5);
+      display: flex; align-items: center; gap: var(--space-3);
+      flex-shrink: 0;
+    }
+    .agent-avatar {
+      width: 40px; height: 40px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--color-primary-mid), #e8a800);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px; flex-shrink: 0;
+      box-shadow: 0 0 0 2px rgba(255,255,255,0.3);
+    }
+    .agent-header-info { flex: 1; }
+    .agent-header-name {
+      font-family: var(--font-display); font-size: var(--text-sm);
+      font-weight: 800; color: #fff; line-height: 1.2;
+    }
+    .agent-header-status {
+      font-size: var(--text-xs); color: rgba(255,255,255,0.65);
+      display: flex; align-items: center; gap: var(--space-2); margin-top: 2px;
+    }
+    .status-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: #4ade80;
+      animation: pulse-dot 2s ease-in-out infinite;
+    }
+    .agent-header-close {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.7);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: background 0.15s ease;
+      font-size: 16px; flex-shrink: 0;
+    }
+    .agent-header-close:hover { background: rgba(255,255,255,0.2); color: #fff; }
+
+    /* Messages */
+    .agent-messages {
+      flex: 1; overflow-y: auto; padding: var(--space-5);
+      display: flex; flex-direction: column; gap: var(--space-4);
+      scroll-behavior: smooth;
+    }
+    .agent-messages::-webkit-scrollbar { width: 4px; }
+    .agent-messages::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 4px; }
+
+    /* Bubble base */
+    .msg { display: flex; gap: var(--space-3); align-items: flex-end; max-width: 90%; }
+    .msg.user { flex-direction: row-reverse; align-self: flex-end; }
+    .msg.agent { align-self: flex-start; }
+
+    .msg-avatar {
+      width: 28px; height: 28px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; flex-shrink: 0; font-weight: 800;
+    }
+    .msg.agent .msg-avatar { background: linear-gradient(135deg, var(--color-primary-mid), #e8a800); color: var(--color-uft); }
+    .msg.user  .msg-avatar { background: var(--color-uft); color: #fff; font-size: 11px; }
+
+    .msg-bubble {
+      padding: var(--space-3) var(--space-4);
+      border-radius: var(--radius-xl);
+      font-size: var(--text-sm);
+      line-height: 1.6;
+      max-width: none;
+    }
+    .msg.agent .msg-bubble {
+      background: var(--color-surface-2);
+      border: 1px solid var(--color-border);
+      border-bottom-left-radius: var(--radius-sm);
+      color: var(--color-text);
+    }
+    .msg.user .msg-bubble {
+      background: var(--color-uft);
+      color: #fff;
+      border-bottom-right-radius: var(--radius-sm);
+    }
+
+    /* Escalation card inside bubble */
+    .escalation-card {
+      margin-top: var(--space-3);
+      background: linear-gradient(135deg, #fff8e6, #fffdf0);
+      border: 1.5px solid var(--color-primary);
+      border-radius: var(--radius-lg);
+      padding: var(--space-3) var(--space-4);
+    }
+    [data-theme="dark"] .escalation-card {
+      background: linear-gradient(135deg, rgba(228,196,78,0.1), rgba(228,196,78,0.05));
+    }
+    .escalation-label {
+      font-size: var(--text-xs); font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.08em; color: var(--color-primary-hover); margin-bottom: var(--space-2);
+      display: flex; align-items: center; gap: var(--space-2);
+    }
+    .escalation-card p { font-size: var(--text-xs); color: var(--color-text-muted); margin-bottom: var(--space-3); max-width: none; }
+    .escalation-card a {
+      display: inline-flex; align-items: center; gap: var(--space-2);
+      background: var(--color-primary); color: var(--color-uft);
+      padding: var(--space-2) var(--space-4); border-radius: var(--radius-full);
+      font-size: var(--text-xs); font-weight: 800; text-decoration: none;
+      transition: background 0.15s ease;
+    }
+    .escalation-card a:hover { background: var(--color-primary-hover); }
+
+    /* Typing indicator */
+    .msg-typing .msg-bubble {
+      padding: var(--space-3) var(--space-5);
+      display: flex; align-items: center; gap: 5px;
+    }
+    .typing-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--color-text-faint);
+      animation: typing-bounce 1.2s ease-in-out infinite;
+    }
+    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes typing-bounce {
+      0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+      30%            { transform: translateY(-6px); opacity: 1; }
+    }
+
+    /* Quick-reply chips */
+    .quick-replies {
+      display: flex; flex-wrap: wrap; gap: var(--space-2);
+      padding: 0 var(--space-5) var(--space-3);
+    }
+    .qr-chip {
+      padding: var(--space-2) var(--space-3);
+      background: var(--color-surface-2); border: 1.5px solid var(--color-border);
+      border-radius: var(--radius-full); font-size: var(--text-xs); font-weight: 600;
+      color: var(--color-text-muted); cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .qr-chip:hover {
+      background: var(--color-primary-light); border-color: var(--color-primary);
+      color: var(--color-primary-hover);
+    }
+
+    /* Input row */
+    .agent-input-row {
+      padding: var(--space-3) var(--space-4);
+      border-top: 1px solid var(--color-divider);
+      display: flex; gap: var(--space-2); align-items: flex-end;
+      background: var(--color-surface); flex-shrink: 0;
+    }
+    .agent-input {
+      flex: 1; min-height: 40px; max-height: 120px;
+      background: var(--color-surface-2); border: 1.5px solid var(--color-border);
+      border-radius: var(--radius-lg); padding: var(--space-2) var(--space-4);
+      font-size: var(--text-sm); color: var(--color-text); resize: none;
+      line-height: 1.5; overflow-y: auto;
+      transition: border-color 0.15s ease;
+    }
+    .agent-input:focus { outline: none; border-color: var(--color-primary); }
+    .agent-input::placeholder { color: var(--color-text-faint); }
+    .agent-send {
+      width: 40px; height: 40px; border-radius: 50%;
+      background: var(--color-uft); color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; flex-shrink: 0;
+      transition: background 0.15s ease, transform 0.1s ease;
+    }
+    .agent-send:hover  { background: var(--color-uft-mid); }
+    .agent-send:active { transform: scale(0.92); }
+    .agent-send:disabled { background: var(--color-border); cursor: not-allowed; }
+
+    /* Powered-by footer */
+    .agent-footer {
+      padding: var(--space-2) var(--space-5);
+      font-size: 10px; color: var(--color-text-faint);
+      text-align: center; border-top: 1px solid var(--color-divider);
+      flex-shrink: 0;
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="site-nav" role="navigation" aria-label="Main navigation">
+  <div class="container nav-inner">
+    <a href="index.html" class="nav-logo">
+      <div class="nav-logo-mark">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+      </div>
+      <div class="nav-logo-text">UFT Learning Lounge<span>Professional Learning · AI Series</span></div>
+    </a>
+    <div class="nav-links-wrapper" id="navMenu">
+      <ul class="nav-links" role="list">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="sessions.html">Sessions</a></li>
+        <li><a href="cafe.html" class="active">Question Café</a></li>
+        <li><a href="#ask" class="nav-cta btn">☕ Ask a Question</a></li>
+      </ul>
+    </div>
+    <div class="nav-right">
+      <button class="theme-toggle" data-theme-toggle aria-label="Switch theme"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></button>
+      <button class="nav-hamburger" id="menuToggle" aria-label="Toggle menu" aria-expanded="false"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+</nav>
+
+<!-- CAFE HERO -->
+<section class="cafe-hero" aria-labelledby="cafe-page-title">
+  <div class="container cafe-hero-inner">
+    <div>
+      <div class="cafe-hero-eyebrow">Community Space</div>
+      <h1 id="cafe-page-title">The Question Café ☕</h1>
+      <p>Have a question about AI and your UFT work? Post it here. Your colleagues have answers — and the best ones get featured for everyone to learn from.</p>
+    </div>
+    <div class="cafe-hero-art" aria-hidden="true">☕</div>
+  </div>
+</section>
+
+<!-- RULES STRIP -->
+<div class="cafe-rules-strip">
+  <div class="container cafe-rules-inner">
+    <strong>Community Guidelines:</strong>
+    <span class="rule-chip">✅ Be specific — good questions get good answers</span>
+    <span class="rule-chip">🤝 Share what worked AND what didn't</span>
+    <span class="rule-chip">🔒 No sensitive member data in examples</span>
+    <span class="rule-chip">💡 All experience levels welcome</span>
+  </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="container">
+  <div class="cafe-layout">
+
+    <!-- LEFT: Form + Feed -->
+    <main>
+
+      <!-- ASK A QUESTION -->
+      <div id="ask" class="ask-card">
+        <div class="ask-card-head">
+          <div class="ask-card-icon-lg" aria-hidden="true">💬</div>
+          <div>
+            <h2>Ask the Community</h2>
+            <p>Your question could help dozens of your UFT colleagues</p>
+          </div>
+        </div>
+        <form class="ask-form" id="askForm" novalidate>
+          <div class="form-group">
+            <label class="form-label" for="q-name">Your Name <span class="required">*</span></label>
+            <input type="text" id="q-name" class="form-input" placeholder="e.g. Maria T., UFT Communications" required/>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="q-dept">Department / Role</label>
+            <input type="text" id="q-dept" class="form-input" placeholder="e.g. Membership, CTE, Grievance, Professional Learning…"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Category <span class="required">*</span></label>
+            <div class="category-picker" role="group" aria-label="Question category">
+              <button type="button" class="cat-btn active" data-cat="Prompting">✍️ Prompting</button>
+              <button type="button" class="cat-btn" data-cat="Personas">🎭 Personas</button>
+              <button type="button" class="cat-btn" data-cat="ChatGPT">🤖 ChatGPT</button>
+              <button type="button" class="cat-btn" data-cat="Claude">✨ Claude</button>
+              <button type="button" class="cat-btn" data-cat="Use Cases">💡 Use Cases</button>
+              <button type="button" class="cat-btn" data-cat="Tools">🛠️ Tools</button>
+              <button type="button" class="cat-btn" data-cat="Other">🗂️ Other</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="q-text">Your Question <span class="required">*</span></label>
+            <textarea id="q-text" class="form-textarea" rows="4" placeholder="Be specific — the more context you give, the better the answer. For example: 'I'm a chapter leader trying to draft a response to a principal's directive. I used ChatGPT but it kept giving generic corporate language. What am I doing wrong?'" required maxlength="600"></textarea>
+            <div style="text-align:right;font-size:var(--text-xs);color:var(--color-text-faint);margin-top:var(--space-1);" id="charCount">0 / 600</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="q-session">Related Session (optional)</label>
+            <select id="q-session" class="form-select">
+              <option value="">— Select a session if relevant —</option>
+              <option value="session-1">Session 1: Anatomy of a Prompt</option>
+              <option value="session-2">Session 2: AI Personas</option>
+              <option value="session-3">Session 3: The Prompt Ladder</option>
+              <option value="general">General AI Question</option>
+            </select>
+          </div>
+          <div class="form-actions">
+            <p class="form-note">Questions are reviewed before posting. Allow up to 24 hours for moderation.</p>
+            <button type="submit" class="btn btn-primary btn-lg">Post My Question →</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- FEED -->
+      <div id="featured">
+        <div class="feed-header">
+          <h2>Community Questions</h2>
+          <div class="feed-filters" role="group" aria-label="Filter questions">
+            <button class="filter-btn active" data-filter="all">All</button>
+            <button class="filter-btn" data-filter="featured">⭐ Featured</button>
+            <button class="filter-btn" data-filter="answered">✅ Answered</button>
+            <button class="filter-btn" data-filter="recent">🕐 Recent</button>
+          </div>
+        </div>
+
+        <!-- Q1 — Featured + Answered -->
+        <article class="q-card featured answered" data-status="featured answered" tabindex="0">
+          <div class="q-card-meta">
+            <div class="q-avatar av-1">JR</div>
+            <div class="q-meta-text">
+              <div class="q-author">James R.</div>
+              <div class="q-dept">UFT Grievance Department</div>
+            </div>
+            <span class="q-time">2 days ago</span>
+          </div>
+          <p class="q-text">"What's the best way to use AI to help draft a grievance response without it sounding generic or corporate? Every time I try, it loses the union voice entirely."</p>
+          <div class="q-answer-preview">
+            <div class="q-answer-label">✅ Top Answer</div>
+            <div class="q-answer-text">The fix is a persona. Before asking for the draft, paste a persona that tells the AI: "You are a UFT grievance specialist. Your tone is firm, member-centered, and grounded in contract language. Never use corporate HR phrasing." Then ask for the draft. The persona pre-loads the union voice so the AI doesn't default to a generic professional style. — <strong>Maria T., UFT Communications</strong></div>
+          </div>
+          <div class="q-card-footer">
+            <button class="q-vote-btn voted" aria-label="Upvote — 14 votes" aria-pressed="true">👍 14</button>
+            <span class="q-answers-count has-answers">💬 3 answers</span>
+            <span class="q-featured-badge">⭐ Featured</span>
+            <span class="q-answered-badge">✅ Answered</span>
+            <span class="badge badge-gold">Personas</span>
+          </div>
+        </article>
+
+        <!-- Q2 — Answered -->
+        <article class="q-card answered" data-status="answered" tabindex="0">
+          <div class="q-card-meta">
+            <div class="q-avatar av-2">ST</div>
+            <div class="q-meta-text">
+              <div class="q-author">Sade T.</div>
+              <div class="q-dept">CTE — VP Office</div>
+            </div>
+            <span class="q-time">3 days ago</span>
+          </div>
+          <p class="q-text">"Can I save my persona in Claude so I don't have to re-paste it every time I open a new conversation? It's getting tedious."</p>
+          <div class="q-answer-preview">
+            <div class="q-answer-label">✅ Top Answer</div>
+            <div class="q-answer-text">Yes — use Claude Projects! Go to claude.ai, click "Projects" in the left sidebar, create a project (e.g. "CTE Work"), and paste your persona into "Edit project instructions." Every new chat you open inside that project auto-loads your persona. You can also upload documents like your department's reference materials so Claude can cite them. — <strong>Session 2 Resource Page</strong></div>
+          </div>
+          <div class="q-card-footer">
+            <button class="q-vote-btn" aria-label="Upvote — 9 votes" aria-pressed="false">👍 9</button>
+            <span class="q-answers-count has-answers">💬 2 answers</span>
+            <span class="q-answered-badge">✅ Answered</span>
+            <span class="badge badge-blue">Claude</span>
+          </div>
+        </article>
+
+        <!-- Q3 — Featured -->
+        <article class="q-card featured" data-status="featured" tabindex="0">
+          <div class="q-card-meta">
+            <div class="q-avatar av-3">DP</div>
+            <div class="q-meta-text">
+              <div class="q-author">Diana P.</div>
+              <div class="q-dept">UFT Membership</div>
+            </div>
+            <span class="q-time">4 days ago</span>
+          </div>
+          <p class="q-text">"I tried the Prompt Ladder activity with my team and we loved it — but some people got stuck on Level 1 because they didn't know what scenario to pick. Any tips for helping people who freeze?"</p>
+          <div class="q-card-footer">
+            <button class="q-vote-btn" aria-label="Upvote — 7 votes" aria-pressed="false">👍 7</button>
+            <span class="q-answers-count has-answers">💬 4 answers</span>
+            <span class="q-featured-badge">⭐ Featured</span>
+            <span class="badge badge-green">Use Cases</span>
+          </div>
+        </article>
+
+        <!-- Q4 — Recent, unanswered -->
+        <article class="q-card" data-status="recent" tabindex="0">
+          <div class="q-card-meta">
+            <div class="q-avatar av-4">KW</div>
+            <div class="q-meta-text">
+              <div class="q-author">Kevin W.</div>
+              <div class="q-dept">UFT Research &amp; Data</div>
+            </div>
+            <span class="q-time">1 day ago</span>
+          </div>
+          <p class="q-text">"When I ask ChatGPT to summarize an education research report, it gives me a great summary — but it sometimes adds claims that aren't in the original document. Is there a way to stop it from doing that?"</p>
+          <div class="q-card-footer">
+            <button class="q-vote-btn" aria-label="Upvote — 5 votes" aria-pressed="false">👍 5</button>
+            <span class="q-answers-count">💬 0 answers — be the first!</span>
+            <span class="badge badge-gold">Prompting</span>
+          </div>
+        </article>
+
+        <!-- Q5 — Recent, unanswered -->
+        <article class="q-card" data-status="recent" tabindex="0">
+          <div class="q-card-meta">
+            <div class="q-avatar av-5">RL</div>
+            <div class="q-meta-text">
+              <div class="q-author">Rosa L.</div>
+              <div class="q-dept">UFT Professional Learning</div>
+            </div>
+            <span class="q-time">6 hours ago</span>
+          </div>
+          <p class="q-text">"I want to build a persona for PD facilitation — something that helps me draft workshop agendas and session materials. What information do I need to include to make it as useful as possible for training content?"</p>
+          <div class="q-card-footer">
+            <button class="q-vote-btn" aria-label="Upvote — 2 votes" aria-pressed="false">👍 2</button>
+            <span class="q-answers-count">💬 0 answers — be the first!</span>
+            <span class="badge badge-blue">Personas</span>
+          </div>
+        </article>
+
+        <!-- Q6 — Recent answered -->
+        <article class="q-card answered" data-status="answered recent" tabindex="0">
+          <div class="q-card-meta">
+            <div class="q-avatar av-6">MT</div>
+            <div class="q-meta-text">
+              <div class="q-author">Marcus T.</div>
+              <div class="q-dept">UFT School Chapter Leaders</div>
+            </div>
+            <span class="q-time">5 days ago</span>
+          </div>
+          <p class="q-text">"Is it okay to paste actual emails or documents from work into ChatGPT? I'm not sure what's safe to share with an AI."</p>
+          <div class="q-answer-preview">
+            <div class="q-answer-label">✅ Top Answer</div>
+            <div class="q-answer-text">Great question — treat AI tools like email. You can paste in non-sensitive work content (draft agendas, public policy text, general communications templates) but avoid personally identifiable member information, confidential grievance details, or sensitive HR matters. When in doubt, anonymize first: replace names with "Member A" or "Teacher B." — <strong>UFT IT Guidance</strong></div>
+          </div>
+          <div class="q-card-footer">
+            <button class="q-vote-btn" aria-label="Upvote — 11 votes" aria-pressed="false">👍 11</button>
+            <span class="q-answers-count has-answers">💬 2 answers</span>
+            <span class="q-answered-badge">✅ Answered</span>
+            <span class="badge badge-uft">Tools</span>
+          </div>
+        </article>
+
+      </div><!-- /feed -->
+    </main>
+
+    <!-- RIGHT: Sidebar -->
+    <aside class="cafe-sidebar">
+
+      <!-- Stats -->
+      <div class="sidebar-card">
+        <h3>☕ Café Stats</h3>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-4);">
+          <div style="text-align:center;padding:var(--space-3);background:var(--color-surface-offset);border-radius:var(--radius-lg);">
+            <div style="font-family:var(--font-display);font-size:var(--text-xl);font-weight:900;color:var(--color-primary);">6</div>
+            <div style="font-size:var(--text-xs);color:var(--color-text-muted);">Questions</div>
+          </div>
+          <div style="text-align:center;padding:var(--space-3);background:var(--color-surface-offset);border-radius:var(--radius-lg);">
+            <div style="font-family:var(--font-display);font-size:var(--text-xl);font-weight:900;color:var(--color-success);">4</div>
+            <div style="font-size:var(--text-xs);color:var(--color-text-muted);">Answered</div>
+          </div>
+          <div style="text-align:center;padding:var(--space-3);background:var(--color-surface-offset);border-radius:var(--radius-lg);">
+            <div style="font-family:var(--font-display);font-size:var(--text-xl);font-weight:900;color:var(--color-accent);">48</div>
+            <div style="font-size:var(--text-xs);color:var(--color-text-muted);">Total Votes</div>
+          </div>
+          <div style="text-align:center;padding:var(--space-3);background:var(--color-surface-offset);border-radius:var(--radius-lg);">
+            <div style="font-family:var(--font-display);font-size:var(--text-xl);font-weight:900;color:var(--color-uft);">6</div>
+            <div style="font-size:var(--text-xs);color:var(--color-text-muted);">Departments</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Trending Topics -->
+      <div class="sidebar-card">
+        <h3>🔥 Trending Topics</h3>
+        <div class="trending-list">
+          <a href="#" class="trending-item">
+            <span class="trending-num">1</span>
+            <span class="trending-q">How to save a persona permanently in Claude Projects</span>
+          </a>
+          <a href="#" class="trending-item">
+            <span class="trending-num">2</span>
+            <span class="trending-q">Keeping the union voice when drafting with AI</span>
+          </a>
+          <a href="#" class="trending-item">
+            <span class="trending-num">3</span>
+            <span class="trending-q">What's safe to share with AI tools at work?</span>
+          </a>
+          <a href="#" class="trending-item">
+            <span class="trending-num">4</span>
+            <span class="trending-q">ChatGPT vs Claude — which is better for long documents?</span>
+          </a>
+          <a href="#" class="trending-item">
+            <span class="trending-num">5</span>
+            <span class="trending-q">Stopping AI from adding information that isn't there</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Departments Active -->
+      <div class="sidebar-card">
+        <h3>🏢 Active Departments</h3>
+        <div class="dept-list">
+          <span class="badge badge-gold">Membership</span>
+          <span class="badge badge-blue">CTE</span>
+          <span class="badge badge-green">Professional Learning</span>
+          <span class="badge badge-uft">Grievance</span>
+          <span class="badge badge-gold">Research</span>
+          <span class="badge badge-blue">Chapter Leaders</span>
+          <span class="badge badge-green">Communications</span>
+        </div>
+      </div>
+
+      <!-- Café Rules -->
+      <div class="sidebar-card">
+        <h3>📋 Café Guidelines</h3>
+        <ul class="rules-list" role="list">
+          <li><span>✅</span><span>Be specific — describe what you tried and what happened</span></li>
+          <li><span>🤝</span><span>Share both successes and failures — both help the community</span></li>
+          <li><span>🔒</span><span>Never include real member names, case numbers, or personal data in examples</span></li>
+          <li><span>👋</span><span>All experience levels are welcome — no question is too basic</span></li>
+          <li><span>💬</span><span>Upvote answers that helped you — it helps others find them</span></li>
+        </ul>
+      </div>
+
+      <!-- Related Sessions -->
+      <div class="sidebar-card" style="background:var(--color-uft-light);border-color:var(--color-uft-mid);">
+        <h3 style="color:var(--color-uft);">📚 Related Sessions</h3>
+        <div style="display:flex;flex-direction:column;gap:var(--space-3);">
+          <a href="sessions.html#session-2" style="display:flex;gap:var(--space-3);align-items:center;text-decoration:none;color:var(--color-uft);font-size:var(--text-sm);font-weight:600;transition:color var(--tx);">
+            <span style="font-size:20px;">🎭</span> Session 2: AI Personas — answers most persona questions
+          </a>
+          <a href="sessions.html#session-3" style="display:flex;gap:var(--space-3);align-items:center;text-decoration:none;color:var(--color-uft);font-size:var(--text-sm);font-weight:600;">
+            <span style="font-size:20px;">🪜</span> Session 3: Prompt Ladder — practice prompting step-by-step
+          </a>
+        </div>
+      </div>
+
+    </aside>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast" role="alert" aria-live="polite">
+  <span class="toast-icon">☕</span>
+  <div>
+    <strong>Question submitted!</strong><br>
+    <span style="font-size:var(--text-xs);color:var(--color-text-muted);">It'll appear after a quick review — usually within 24 hours.</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     LOUNGE ASSISTANT — FLOATING CHAT WIDGET
+═══════════════════════════════════════════ -->
+
+<!-- FAB -->
+<button class="agent-fab" id="agentFab" aria-label="Open Lounge Assistant" aria-expanded="false" aria-controls="agentWindow">
+  <span class="agent-fab-label">Ask the Lounge Assistant</span>
+  <span class="agent-fab-icon-open" aria-hidden="true">
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+      <path d="M12 2a10 10 0 0 1 10 10c0 5.52-4.48 10-10 10a9.96 9.96 0 0 1-5.19-1.45L2 22l1.45-4.81A9.96 9.96 0 0 1 2 12 10 10 0 0 1 12 2z"/>
+      <path d="M8 12h.01M12 12h.01M16 12h.01"/>
+    </svg>
+  </span>
+  <span class="agent-fab-icon-close" aria-hidden="true">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+      <path d="M18 6L6 18M6 6l12 12"/>
+    </svg>
+  </span>
+</button>
+
+<!-- CHAT WINDOW -->
+<div class="agent-window" id="agentWindow" role="dialog" aria-label="Lounge Assistant" aria-modal="false">
+
+  <!-- Header -->
+  <div class="agent-header">
+    <div class="agent-avatar" aria-hidden="true">🤖</div>
+    <div class="agent-header-info">
+      <div class="agent-header-name">Lounge Assistant</div>
+      <div class="agent-header-status">
+        <span class="status-dot"></span>
+        Powered by UFT Learning Lounge · AI Series
+      </div>
+    </div>
+    <button class="agent-header-close" id="agentClose" aria-label="Close assistant">✕</button>
+  </div>
+
+  <!-- Messages -->
+  <div class="agent-messages" id="agentMessages" aria-live="polite" aria-label="Chat messages">
+    <!-- Welcome message injected by JS -->
+  </div>
+
+  <!-- Quick replies -->
+  <div class="quick-replies" id="quickReplies">
+    <button class="qr-chip" data-q="What is a prompt persona?">🎭 What's a persona?</button>
+    <button class="qr-chip" data-q="How do I save my persona in Claude?">💾 Save in Claude?</button>
+    <button class="qr-chip" data-q="What's the difference between ChatGPT and Claude?">🤖 ChatGPT vs Claude?</button>
+    <button class="qr-chip" data-q="What is the Prompt Ladder activity?">🪜 Prompt Ladder?</button>
+  </div>
+
+  <!-- Input -->
+  <div class="agent-input-row">
+    <textarea
+      class="agent-input"
+      id="agentInput"
+      placeholder="Ask me anything about AI, prompting, or the sessions…"
+      rows="1"
+      aria-label="Your message"
+      maxlength="500"
+    ></textarea>
+    <button class="agent-send" id="agentSend" aria-label="Send message">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3">
+        <path d="M22 2L11 13M22 2L15 22l-4-9-9-4 20-7z"/>
+      </svg>
+    </button>
+  </div>
+
+  <div class="agent-footer">Lounge Assistant · UFT Learning Lounge 2026 · If unsure, questions are forwarded to Sade Strickland</div>
+</div>
+
+<!-- FOOTER -->
+<footer class="site-footer" role="contentinfo">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <h3>UFT Learning Lounge</h3>
+        <p>A professional learning space for United Federation of Teachers staff — built to make AI skills accessible, practical, and rooted in the work you actually do.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Sessions</h4>
+        <ul role="list">
+          <li><a href="sessions.html#session-1">Session 1: Anatomy of a Prompt</a></li>
+          <li><a href="sessions.html#session-2">Session 2: AI Personas</a></li>
+          <li><a href="sessions.html#session-3">Session 3: The Prompt Ladder</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Community</h4>
+        <ul role="list">
+          <li><a href="cafe.html">Question Café</a></li>
+          <li><a href="#ask">Ask a Question</a></li>
+          <li><a href="#featured">Featured Answers</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 United Federation of Teachers · Professional Learning</span>
+      <span>Made for UFT Staff · <a href="https://uft.org">uft.org</a></span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  /* ── Theme toggle ── */
+  (function(){
+    const toggle = document.querySelector('[data-theme-toggle]');
+    const html   = document.documentElement;
+    let theme = html.getAttribute('data-theme') || (matchMedia('(prefers-color-scheme:dark)').matches ? 'dark' : 'light');
+    html.setAttribute('data-theme', theme);
+    const moonSVG = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+    const sunSVG  = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>';
+    if (toggle) {
+      toggle.innerHTML = theme === 'dark' ? sunSVG : moonSVG;
+      toggle.addEventListener('click', () => {
+        theme = theme === 'dark' ? 'light' : 'dark';
+        html.setAttribute('data-theme', theme);
+        toggle.innerHTML = theme === 'dark' ? sunSVG : moonSVG;
+      });
+    }
+  })();
+
+  /* ── Mobile nav ── */
+  const menuToggle = document.getElementById('menuToggle');
+  const navMenu    = document.getElementById('navMenu');
+  if (menuToggle && navMenu) {
+    menuToggle.addEventListener('click', () => {
+      const open = navMenu.classList.toggle('open');
+      menuToggle.setAttribute('aria-expanded', open);
+    });
+  }
+
+  /* ── Category picker ── */
+  document.querySelectorAll('.cat-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    });
+  });
+
+  /* ── Char counter ── */
+  const textarea  = document.getElementById('q-text');
+  const charCount = document.getElementById('charCount');
+  if (textarea && charCount) {
+    textarea.addEventListener('input', () => {
+      const len = textarea.value.length;
+      charCount.textContent = len + ' / 600';
+      charCount.style.color = len > 550 ? 'var(--color-primary)' : 'var(--color-text-faint)';
+    });
+  }
+
+  /* ── Form submit ── */
+  const askForm = document.getElementById('askForm');
+  const toast   = document.getElementById('toast');
+  if (askForm && toast) {
+    askForm.addEventListener('submit', e => {
+      e.preventDefault();
+      const name = document.getElementById('q-name').value.trim();
+      const text = document.getElementById('q-text').value.trim();
+      if (!name || !text) {
+        alert('Please fill in your name and question before submitting.');
+        return;
+      }
+      toast.classList.add('show');
+      askForm.reset();
+      charCount.textContent = '0 / 600';
+      setTimeout(() => toast.classList.remove('show'), 4500);
+    });
+  }
+
+  /* ── Vote buttons ── */
+  document.querySelectorAll('.q-vote-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const voted = btn.classList.toggle('voted');
+      const count = parseInt(btn.textContent.match(/\d+/)[0]);
+      btn.textContent = '👍 ' + (voted ? count + 1 : count - 1);
+      btn.setAttribute('aria-pressed', voted);
+    });
+  });
+
+  /* ── Feed filters ── */
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const filter = btn.dataset.filter;
+      document.querySelectorAll('.q-card').forEach(card => {
+        card.style.display = (filter === 'all' || (card.dataset.status || '').includes(filter)) ? '' : 'none';
+      });
+    });
+  });
+
+
+  /* ══════════════════════════════════════════════════════
+     LOUNGE ASSISTANT — KNOWLEDGE BASE + RESPONSE ENGINE
+  ══════════════════════════════════════════════════════ */
+
+  const SADE_EMAIL = 'sstrickland@uft.org';
+
+  /* ── Knowledge base: keyword groups → answer ── */
+  const KB = [
+    {
+      keys: ['what is a persona','what is an ai persona','define persona','persona mean','personas work','why use a persona','why persona'],
+      answer: `A <strong>persona</strong> is a set of instructions you give the AI at the start of a session that defines who it is, what it knows, how it communicates, and who it's talking to — before you ask your first question.<br><br>
+Think of it like onboarding a consultant: instead of just saying "help me," you give them a background, an expertise area, a tone, and ground rules. A persona transforms a generic AI tool into a specialist built for your exact UFT context.<br><br>
+The five building blocks of every persona: <strong>Role, Knowledge Base, Audience, Tone/Voice,</strong> and <strong>Goals & Guardrails</strong>.<br><br>
+👉 Session 2 covers this in full — check the <a href="sessions.html#session-2" style="color:var(--color-primary);font-weight:700;">Session 2 materials</a>.`
+    },
+    {
+      keys: ['save persona','save my persona','store persona','keep persona','reuse persona','not retype','don\'t have to paste'],
+      answer: `Great question — there are two ways depending on which tool you're using:<br><br>
+<strong>In ChatGPT:</strong> Go to your profile icon → <em>Customize ChatGPT</em> → paste your persona into the two Custom Instructions fields. Every new chat auto-loads it.<br><br>
+<strong>In Claude:</strong> Use <em>Claude Projects</em>. Click "Projects" in the left sidebar → create a project (e.g. "UFT CTE Work") → paste your persona into "Edit project instructions." You can also upload documents like reference materials. Every chat inside the project loads your persona automatically.<br><br>
+📌 For screenshots and step-by-step instructions, see the <a href="sessions.html#session-2" style="color:var(--color-primary);font-weight:700;">Session 2 Resource Page</a>.`
+    },
+    {
+      keys: ['chatgpt vs claude','claude vs chatgpt','difference between chatgpt','which is better','chatgpt or claude','compare chatgpt','compare claude'],
+      answer: `Both are excellent — they shine in different areas:<br><br>
+<strong>ChatGPT (GPT-4):</strong> Great for structured tasks, producing specific formats, research, and step-by-step outputs. Custom GPTs let you build dedicated role-specific tools (Plus plan).<br><br>
+<strong>Claude:</strong> Exceptional at long documents, nuanced writing, and maintaining consistent tone across a long conversation. Claude Projects lets you store your persona AND upload documents for free.<br><br>
+<strong>The practical rule:</strong> For drafting communications, reports, and UFT-specific writing — try Claude. For structured outputs, research summaries, and format-heavy tasks — try ChatGPT. When in doubt, try both and compare.<br><br>
+📌 Session 1 covers LLM differences in detail — see <a href="sessions.html#session-1" style="color:var(--color-primary);font-weight:700;">Session 1 materials</a>.`
+    },
+    {
+      keys: ['prompt ladder','levels','level 1','level 2','level 3','level 4','game','gamified','activity','challenge','climb'],
+      answer: `The <strong>Prompt Ladder</strong> is the Session 3 activity — a 4-level gamified challenge where you pick a real task from your job and rewrite the same prompt four times, adding a new expert ingredient each round:<br><br>
+🟡 <strong>Level 1 — The Bare Ask</strong> (10 pts): One sentence, no context<br>
+🔵 <strong>Level 2 — Task + Context</strong> (25 pts): Add WHO, WHY, WHAT<br>
+🟢 <strong>Level 3 — + Role & Format</strong> (40 pts): Your role + output structure<br>
+🟣 <strong>Level 4 — The Full Package</strong> (50 pts + vote): Persona + constraint<br><br>
+Outputs go to a shared Padlet, and the group votes on the best Level 4 response. Max score: <strong>125 points</strong>.<br><br>
+📌 All materials, participant cards, and a worked example are on the <a href="sessions.html#session-3" style="color:var(--color-primary);font-weight:700;">Session 3 page</a>.`
+    },
+    {
+      keys: ['anatomy of a prompt','prompt structure','role context task format','parts of a prompt','what makes a good prompt','elements of a prompt','session 1'],
+      answer: `A great prompt has <strong>four elements</strong> — remember them as RCTF:<br><br>
+🧩 <strong>Role</strong> — Who should the AI act as? ("You are a UFT Membership Coordinator…")<br>
+🧩 <strong>Context</strong> — What's the situation? Who is the audience? Why is this needed?<br>
+🧩 <strong>Task</strong> — What exactly do you want it to do?<br>
+🧩 <strong>Format</strong> — How should the output look? (Email, bullet list, FAQ, table…)<br><br>
+Most people skip Role and Format, which is why their results feel generic. Adding all four — especially once you also have a persona — produces output that's immediately usable.<br><br>
+📌 See <a href="sessions.html#session-1" style="color:var(--color-primary);font-weight:700;">Session 1</a> for the full prompt anatomy breakdown.`
+    },
+    {
+      keys: ['union voice','uft voice','sounds generic','corporate language','sounds like hr','not union','generic response','not union sounding'],
+      answer: `This is the most common frustration with AI — and a persona is the direct fix.<br><br>
+The AI defaults to a generic "professional" voice unless you tell it otherwise. Before your next prompt, paste a persona that includes:<br><br>
+✅ <em>"Your tone is warm, collegial, and pro-worker — never corporate or bureaucratic."</em><br>
+✅ <em>"Always center the needs and rights of UFT members."</em><br>
+✅ <em>"Avoid phrases like 'please be advised,' 'per my previous email,' or 'best practices.'"</em><br><br>
+Also add a constraint like: <em>"Do not use corporate HR language."</em> Explicit guardrails are more effective than general tone instructions because they give the AI specific things to avoid.<br><br>
+📌 The <a href="sessions.html#session-2" style="color:var(--color-primary);font-weight:700;">Session 2 Before & After slide</a> shows exactly how this transforms an email output.`
+    },
+    {
+      keys: ['safe to share','what can i paste','personal data','member information','confidential','privacy','secure'],
+      answer: `Treat AI tools the same way you'd treat email — with care.<br><br>
+<strong>✅ Generally fine to share:</strong><br>
+• Non-sensitive draft communications, templates, agendas<br>
+• Public policy text, contract language (non-confidential)<br>
+• Anonymized scenarios and examples<br><br>
+<strong>🚫 Do not share:</strong><br>
+• Real member names, ID numbers, or case numbers<br>
+• Confidential grievance details or HR matters<br>
+• Personally identifiable information about any individual<br><br>
+<strong>When in doubt:</strong> anonymize first. Replace names with "Member A" or "Teacher B." This gives the AI all the context it needs without exposing sensitive data.<br><br>
+If your department has specific data governance policies, follow those first.`
+    },
+    {
+      keys: ['hallucination','makes things up','adds information','not in the document','inaccurate','fabricate','wrong facts','false information'],
+      answer: `This is called <strong>hallucination</strong> — when the AI generates plausible-sounding but incorrect or invented information. It's one of the most important things to know about AI tools.<br><br>
+<strong>How to reduce it:</strong><br>
+1. Add a constraint: <em>"Only use information from the text I provide. Do not add outside claims."</em><br>
+2. Paste the source document directly into the chat before asking for a summary<br>
+3. Ask the AI to quote from the original: <em>"Cite the specific sentence from the document that supports each point."</em><br>
+4. In Claude Projects, upload your source document — Claude tends to stay closer to uploaded materials<br><br>
+<strong>The golden rule:</strong> Always review AI outputs before using them, especially when factual accuracy matters. AI is a first-draft tool, not a fact-checker.`
+    },
+    {
+      keys: ['cte','career and technical education','career technical','culinary','cosmetology','construction trades','health careers','it program','trade program'],
+      answer: `For UFT CTE-specific AI work, the key is building a persona that reflects the unique context of CTE education in NYC:<br><br>
+• Reference specific program areas (culinary arts, cosmetology, IT, health careers, construction trades)<br>
+• Include your audience: UFT members teaching career pathways who value both trade expertise and educator identity<br>
+• Mention industry standards and NYSED CTE frameworks as relevant knowledge<br><br>
+A great worked example — Sade Strickland's 4-level Prompt Ladder for the CTE VP Office — is available on the <a href="sessions.html#session-3" style="color:var(--color-primary);font-weight:700;">Session 3 materials page</a>. It shows a full email prompt built from Level 1 through Level 4 for a real CTE scenario.`
+    },
+    {
+      keys: ['what sessions','sessions available','how many sessions','session list','what topics','what do sessions cover','summer lounge','2026'],
+      answer: `The <strong>2026 UFT Summer Learning Lounge</strong> has three one-hour sessions:<br><br>
+🧩 <strong>Session 1 — Anatomy of a Prompt:</strong> How LLMs work, the four elements of a great prompt (Role, Context, Task, Format), and ChatGPT vs Claude vs Gemini<br><br>
+🎭 <strong>Session 2 — AI Personas:</strong> What personas are, how to build one for your UFT role, saving them in ChatGPT and Claude, complete UFT Membership example<br><br>
+🪜 <strong>Session 3 — The Prompt Ladder:</strong> A gamified 4-level activity where you build a full expert prompt from scratch using your real daily work<br><br>
+📌 All session materials are on the <a href="sessions.html" style="color:var(--color-primary);font-weight:700;">Sessions page</a>.`
+    },
+    {
+      keys: ['membership','renewal email','member benefits','welfare fund','dues','member outreach','member communication'],
+      answer: `For UFT Membership communications with AI, start with a persona that includes:<br><br>
+• <strong>Role:</strong> "You are a UFT Membership Coordinator with 10+ years of experience..."<br>
+• <strong>Knowledge:</strong> Benefits, dues structures, welfare fund, dental/optical, COPE, Taylor Law, UFT contract<br>
+• <strong>Audience:</strong> Active teachers, paraprofessionals, and SRPs asking about membership benefits<br>
+• <strong>Tone:</strong> Warm, clear, empowering — always affirm the value of union membership<br>
+• <strong>Guardrail:</strong> If unsure of a policy detail, direct to the UFT helpline at 212-331-6300<br><br>
+The complete ready-to-use UFT Membership Coordinator persona is on the <a href="sessions.html#session-2" style="color:var(--color-primary);font-weight:700;">Session 2 Resource Page</a> — copy and paste it directly.`
+    },
+    {
+      keys: ['grievance','article violation','contract language','taylor law','disciplinary','3020','member rights'],
+      answer: `For AI-assisted grievance work, the key persona element is making sure the AI understands union contract language and member rights — not HR or management framing.<br><br>
+Include in your persona:<br>
+• <em>"You are a UFT grievance specialist with deep knowledge of the UFT contract, Article violations, and member rights under the New York Taylor Law."</em><br>
+• <em>"Your tone is firm, member-centered, and grounded in contract language. Never use corporate HR phrasing or take a management perspective."</em><br>
+• <em>"If specific contract article numbers or legal citations are needed, note that the user should verify them before use."</em><br><br>
+⚠️ Always review AI-generated grievance language before using it in any official communication. AI is a drafting aid, not legal counsel.`
+    },
+    {
+      keys: ['hello','hi','hey','good morning','good afternoon','what can you do','help me','how do you work','what are you'],
+      answer: `Hi there! 👋 I'm the <strong>Lounge Assistant</strong> — your AI guide for the UFT Learning Lounge.<br><br>
+I can answer questions about:<br>
+• 🎭 Building and using AI personas<br>
+• ✍️ Prompting techniques and the Prompt Ladder<br>
+• 🤖 ChatGPT vs Claude — which to use and when<br>
+• ☕ All three 2026 Summer Lounge sessions<br>
+• 🏛️ UFT-specific AI use cases (Membership, CTE, Grievance, Communications, and more)<br><br>
+Just type your question below — or tap one of the quick-reply buttons. If I'm not sure about something, I'll connect you with <strong>Sade Strickland</strong> directly. ☕`
+    },
+    {
+      keys: ['format','output format','bullet','email format','table','faq','numbered list','structure','how to format'],
+      answer: `Telling the AI <em>how to structure the output</em> is one of the most underused prompt upgrades — and it makes results immediately usable.<br><br>
+<strong>Common format options:</strong><br>
+📧 <em>"Format as a professional email with a subject line, 3 short paragraphs, and a call-to-action"</em><br>
+📋 <em>"Give me 5 bullet points, each under 2 sentences"</em><br>
+❓ <em>"Format as an FAQ — 5 questions with plain-language answers"</em><br>
+📊 <em>"Create a two-column comparison table"</em><br>
+🔢 <em>"Step-by-step numbered instructions"</em><br>
+📱 <em>"A social media post under 280 characters"</em><br><br>
+Format instructions go in your prompt at Level 3 of the Prompt Ladder. Combined with a persona at Level 4, you get output that's ready to send with minimal editing.`
+    },
+    {
+      keys: ['constraint','guardrail','limit','rule','restriction','word count','under 200','no jargon','avoid'],
+      answer: `<strong>Constraints</strong> are rules you give the AI about what NOT to do or specific limits to follow. They're the Level 4 upgrade in the Prompt Ladder, and they're surprisingly powerful.<br><br>
+<strong>Examples of useful constraints:</strong><br>
+✂️ <em>"Keep the response under 200 words"</em><br>
+🚫 <em>"Do not use corporate jargon like 'per my previous email' or 'please be advised'"</em><br>
+📞 <em>"Do not mention specific dues amounts — direct members to call 212-331-6300 instead"</em><br>
+✅ <em>"End every communication with a clear call-to-action"</em><br>
+🔒 <em>"Do not make policy claims you cannot verify — flag them for human review"</em><br><br>
+The key insight: constraints are more effective than general tone guidance because they give the AI specific things to avoid, not just vague direction.`
+    },
+    {
+      keys: ['sade','strickland','who is sade','contact sade','reach sade','email sade'],
+      answer: `<strong>Sade Strickland</strong> is the Assistant to the Vice President of Career & Technical Education (CTE) at the UFT. She's also the expert point of contact for questions that go beyond what I can confidently answer here.<br><br>
+If you have a CTE-specific question, a complex prompting situation, or something I can't resolve — I'll generate a pre-filled email to Sade for you. Just let me know what you need help with and I'll set it up.<br><br>
+📧 <a href="mailto:sstrickland@uft.org" style="color:var(--color-primary);font-weight:700;">sstrickland@uft.org</a>`
+    }
+  ];
+
+  /* ── Escalation: things the agent explicitly can't answer ── */
+  const ESCALATION_TRIGGERS = [
+    'policy','official policy','uft policy','specific rule','legal question',
+    'i need specific','my specific situation','my case','personal situation',
+    'contract article','article number','taylor law specific','legal advice',
+    'not sure','confused','complicated','unusual','edge case','exception',
+    'department decision','management decision','i disagree','dispute'
+  ];
+
+  /* ── Match question to KB ── */
+  function findAnswer(q) {
+    const lq = q.toLowerCase().trim();
+
+    // Check escalation triggers first
+    const shouldEscalate = ESCALATION_TRIGGERS.some(t => lq.includes(t));
+
+    // Find best KB match
+    let bestMatch = null;
+    let bestScore = 0;
+    for (const entry of KB) {
+      const score = entry.keys.filter(k => lq.includes(k)).length;
+      if (score > bestScore) { bestScore = score; bestMatch = entry; }
+    }
+
+    if (bestScore >= 1 && !shouldEscalate) {
+      return { type: 'answer', text: bestMatch.answer };
+    }
+
+    if (shouldEscalate || bestScore === 0) {
+      return { type: 'escalate', question: q };
+    }
+
+    return { type: 'answer', text: bestMatch.answer };
+  }
+
+  /* ── Build escalation mailto link ── */
+  function buildMailto(question) {
+    const subject = encodeURIComponent('UFT Learning Lounge — Question from the Question Café');
+    const body = encodeURIComponent(
+      `Hi Sade,\n\nA visitor to the UFT Learning Lounge Question Café submitted the following question that needs your expertise:\n\n"${question}"\n\nThis question was escalated from the Lounge Assistant because it may require specific knowledge or guidance beyond the general AI learning content.\n\nBest,\nUFT Learning Lounge`
+    );
+    return `mailto:${SADE_EMAIL}?subject=${subject}&body=${body}`;
+  }
+
+  /* ── DOM refs ── */
+  const agentFab      = document.getElementById('agentFab');
+  const agentWindow   = document.getElementById('agentWindow');
+  const agentClose    = document.getElementById('agentClose');
+  const agentMessages = document.getElementById('agentMessages');
+  const agentInput    = document.getElementById('agentInput');
+  const agentSend     = document.getElementById('agentSend');
+  const quickReplies  = document.getElementById('quickReplies');
+
+  /* ── Helpers to render messages ── */
+  function appendMsg(role, htmlContent) {
+    const initials = role === 'agent' ? '🤖' : 'YOU';
+    const div = document.createElement('div');
+    div.className = `msg ${role}`;
+    div.innerHTML = `
+      <div class="msg-avatar" aria-hidden="true">${initials}</div>
+      <div class="msg-bubble">${htmlContent}</div>
+    `;
+    agentMessages.appendChild(div);
+    agentMessages.scrollTop = agentMessages.scrollHeight;
+    return div;
+  }
+
+  function showTyping() {
+    const div = document.createElement('div');
+    div.className = 'msg agent msg-typing';
+    div.id = 'typingIndicator';
+    div.innerHTML = `
+      <div class="msg-avatar" aria-hidden="true">🤖</div>
+      <div class="msg-bubble">
+        <span class="typing-dot"></span>
+        <span class="typing-dot"></span>
+        <span class="typing-dot"></span>
+      </div>
+    `;
+    agentMessages.appendChild(div);
+    agentMessages.scrollTop = agentMessages.scrollHeight;
+  }
+
+  function removeTyping() {
+    const el = document.getElementById('typingIndicator');
+    if (el) el.remove();
+  }
+
+  function buildEscalationCard(question) {
+    return `
+      I want to make sure you get the most accurate answer — this question touches on something that may need <strong>specific UFT knowledge or context</strong> that goes beyond my general learning resources.<br><br>
+      I'd like to pass this to <strong>Sade Strickland</strong>, Assistant to the UFT VP of CTE, who can give you a more precise and authoritative answer.
+      <div class="escalation-card">
+        <div class="escalation-label">📧 Pass to Sade Strickland</div>
+        <p>Click below to open a pre-written email to Sade with your question already filled in. She'll get back to you directly.</p>
+        <a href="${buildMailto(question)}" target="_blank" rel="noopener">
+          ✉️ Email Sade at sstrickland@uft.org
+        </a>
+      </div>
+    `;
+  }
+
+  /* ── Process a user message ── */
+  function handleMessage(text) {
+    if (!text.trim()) return;
+
+    // Hide quick replies after first real message
+    quickReplies.style.display = 'none';
+
+    appendMsg('user', text);
+    agentSend.disabled = true;
+
+    // Typing delay: 600-1200ms for realism
+    const delay = 600 + Math.random() * 600;
+    showTyping();
+
+    setTimeout(() => {
+      removeTyping();
+      const result = findAnswer(text);
+
+      if (result.type === 'escalate') {
+        appendMsg('agent', buildEscalationCard(result.question));
+      } else {
+        appendMsg('agent', result.text);
+      }
+
+      agentSend.disabled = false;
+      agentInput.focus();
+    }, delay);
+  }
+
+  /* ── Open / Close ── */
+  function openAgent() {
+    agentFab.classList.add('open');
+    agentWindow.classList.add('open');
+    agentFab.setAttribute('aria-expanded', 'true');
+    agentInput.focus();
+
+    // Inject welcome message on first open only
+    if (agentMessages.children.length === 0) {
+      appendMsg('agent', `Welcome to the <strong>Lounge Assistant</strong>! ☕<br><br>
+I'm here to answer your questions about AI, prompting, personas, and the 2026 UFT Summer Learning Lounge sessions.<br><br>
+What can I help you with today? You can type a question or tap one of the suggestions below.`);
+    }
+  }
+
+  function closeAgent() {
+    agentFab.classList.remove('open');
+    agentWindow.classList.remove('open');
+    agentFab.setAttribute('aria-expanded', 'false');
+  }
+
+  agentFab.addEventListener('click', () => {
+    agentWindow.classList.contains('open') ? closeAgent() : openAgent();
+  });
+  agentClose.addEventListener('click', closeAgent);
+
+  /* ── Send ── */
+  agentSend.addEventListener('click', () => {
+    handleMessage(agentInput.value.trim());
+    agentInput.value = '';
+    agentInput.style.height = 'auto';
+  });
+
+  agentInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleMessage(agentInput.value.trim());
+      agentInput.value = '';
+      agentInput.style.height = 'auto';
+    }
+  });
+
+  /* Auto-resize textarea */
+  agentInput.addEventListener('input', () => {
+    agentInput.style.height = 'auto';
+    agentInput.style.height = Math.min(agentInput.scrollHeight, 120) + 'px';
+  });
+
+  /* ── Quick reply chips ── */
+  document.querySelectorAll('.qr-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      const q = chip.dataset.q;
+      agentInput.value = '';
+      handleMessage(q);
+    });
+  });
+
+  /* ── Keyboard: Escape closes ── */
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && agentWindow.classList.contains('open')) closeAgent();
+  });
+</script>
+</body>
+</html>
