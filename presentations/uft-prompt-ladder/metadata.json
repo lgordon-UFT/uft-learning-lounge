@@ -1,0 +1,57 @@
+{
+  "presentation_name": "uft-prompt-ladder",
+  "title": "The Prompt Ladder: A UFT Prompting Challenge",
+  "description": "",
+  "slides": {
+    "1": {
+      "title": "The Prompt Ladder — Game Intro",
+      "filename": "slide_01.html",
+      "file_path": "presentations/uft-prompt-ladder/slide_01.html",
+      "created_at": "2026-06-03T16:44:55.283Z"
+    },
+    "2": {
+      "title": "How to Play",
+      "filename": "slide_02.html",
+      "file_path": "presentations/uft-prompt-ladder/slide_02.html",
+      "created_at": "2026-06-03T16:45:22.608Z"
+    },
+    "3": {
+      "title": "The Ladder — All 4 Levels at a Glance",
+      "filename": "slide_03.html",
+      "file_path": "presentations/uft-prompt-ladder/slide_03.html",
+      "created_at": "2026-06-03T16:45:52.446Z"
+    },
+    "4": {
+      "title": "LEVEL 1 — The Bare Ask",
+      "filename": "slide_04.html",
+      "file_path": "presentations/uft-prompt-ladder/slide_04.html",
+      "created_at": "2026-06-03T16:46:18.575Z"
+    },
+    "5": {
+      "title": "LEVEL 2 — Task + Context",
+      "filename": "slide_05.html",
+      "file_path": "presentations/uft-prompt-ladder/slide_05.html",
+      "created_at": "2026-06-03T16:46:43.862Z"
+    },
+    "6": {
+      "title": "LEVEL 3 — Context + Task + Format",
+      "filename": "slide_06.html",
+      "file_path": "presentations/uft-prompt-ladder/slide_06.html",
+      "created_at": "2026-06-03T16:47:15.536Z"
+    },
+    "7": {
+      "title": "LEVEL 4 — The Full Package (Expert)",
+      "filename": "slide_07.html",
+      "file_path": "presentations/uft-prompt-ladder/slide_07.html",
+      "created_at": "2026-06-03T16:47:48.026Z"
+    },
+    "8": {
+      "title": "Debrief — What Did We Learn?",
+      "filename": "slide_08.html",
+      "file_path": "presentations/uft-prompt-ladder/slide_08.html",
+      "created_at": "2026-06-03T16:48:16.585Z"
+    }
+  },
+  "created_at": "2026-06-03T16:44:55.282Z",
+  "updated_at": "2026-06-03T16:48:16.585Z"
+}

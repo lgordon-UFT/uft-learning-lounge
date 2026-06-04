@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Prompt Ladder Sample — Sade Strickland, UFT CTE</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #0f172a;
+      color: #f8fafc;
+      padding: 48px 40px;
+      min-height: 100vh;
+    }
+
+    .doc { max-width: 960px; margin: 0 auto; display: flex; flex-direction: column; gap: 32px; }
+
+    /* ── Header ── */
+    .header {
+      background: linear-gradient(135deg, #002855, #0057a8);
+      border-radius: 16px;
+      padding: 40px 48px;
+      position: relative;
+      overflow: hidden;
+    }
+    .header::before {
+      content: '';
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      background-image: repeating-linear-gradient(45deg, rgba(255,255,255,0.04) 0, rgba(255,255,255,0.04) 1px, transparent 0, transparent 50%);
+      background-size: 24px 24px;
+    }
+    .header-inner { position: relative; }
+    .header-badge {
+      display: inline-block;
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.25);
+      border-radius: 8px;
+      padding: 6px 18px;
+      font-size: 12px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: #a8d4ff;
+      margin-bottom: 16px;
+    }
+    .header h1 { font-size: 40px; font-weight: 900; margin-bottom: 8px; line-height: 1.1; }
+    .header-sub { font-size: 18px; color: #c8e6ff; margin-bottom: 20px; }
+    .header-meta {
+      display: flex; gap: 24px; flex-wrap: wrap;
+    }
+    .meta-chip {
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 8px;
+      padding: 8px 18px;
+      font-size: 14px;
+      color: #e2e8f0;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .meta-chip span { font-weight: 700; color: #fff; }
+
+    /* ── Scenario strip ── */
+    .scenario-strip {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 12px;
+      padding: 24px 32px;
+      display: flex; align-items: flex-start; gap: 20px;
+    }
+    .scenario-icon { font-size: 36px; flex-shrink: 0; margin-top: 2px; }
+    .scenario-label { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; color: #60a5fa; margin-bottom: 8px; }
+    .scenario-text { font-size: 20px; font-weight: 700; color: #f8fafc; line-height: 1.5; margin-bottom: 6px; }
+    .scenario-note { font-size: 15px; color: #94a3b8; line-height: 1.6; }
+
+    /* ── Intro note ── */
+    .intro-note {
+      background: rgba(99,102,241,0.08);
+      border: 1px solid rgba(99,102,241,0.3);
+      border-radius: 10px;
+      padding: 16px 24px;
+      font-size: 15px;
+      color: #c7d2fe;
+      line-height: 1.7;
+    }
+    .intro-note strong { color: #a5b4fc; }
+
+    /* ── Level cards ── */
+    .level-card {
+      border-radius: 16px;
+      overflow: hidden;
+      border: 2px solid;
+    }
+
+    .level-header {
+      padding: 22px 32px;
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 12px;
+    }
+    .level-header-left { display: flex; align-items: center; gap: 16px; }
+    .level-num {
+      width: 52px; height: 52px;
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 26px; font-weight: 900; color: #fff;
+      flex-shrink: 0;
+    }
+    .level-name { font-size: 22px; font-weight: 800; }
+    .level-tag  { font-size: 13px; margin-top: 3px; letter-spacing: 1px; text-transform: uppercase; }
+    .level-pts  { font-size: 28px; font-weight: 900; white-space: nowrap; }
+
+    .level-body { padding: 28px 32px; background: #0f172a; }
+
+    /* What was ADDED this level */
+    .added-bar {
+      border-radius: 8px;
+      padding: 12px 18px;
+      font-size: 14px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      margin-bottom: 20px;
+      display: flex; align-items: center; gap: 10px;
+    }
+
+    /* Prompt box */
+    .prompt-box {
+      background: #020817;
+      border-radius: 10px;
+      padding: 24px 28px;
+      margin-bottom: 20px;
+      position: relative;
+    }
+    .prompt-box-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 12px;
+    }
+    .prompt-text {
+      font-family: 'Inter', sans-serif;
+      font-size: 17px;
+      line-height: 1.85;
+      color: #e2e8f0;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    /* Highlight spans */
+    .hl-task     { color: #fbbf24; }
+    .hl-context  { color: #60a5fa; }
+    .hl-role     { color: #34d399; }
+    .hl-format   { color: #f0abfc; }
+    .hl-persona  { color: #7dd3fc; }
+    .hl-constraint { color: #fb923c; }
+
+    /* Annotation key */
+    .annotation-key {
+      display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px;
+    }
+    .ak-chip {
+      display: flex; align-items: center; gap: 6px;
+      background: #1e293b; border: 1px solid #334155;
+      border-radius: 20px; padding: 4px 14px;
+      font-size: 13px; font-weight: 600;
+    }
+    .ak-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+
+    /* What changed callout */
+    .what-changed {
+      border-radius: 10px;
+      padding: 16px 20px;
+      font-size: 15px;
+      line-height: 1.6;
+      display: flex; gap: 12px; align-items: flex-start;
+    }
+    .what-changed-icon { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
+
+    /* Expected output */
+    .expected-output {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 10px;
+      padding: 16px 20px;
+      font-size: 15px;
+      color: #94a3b8;
+      line-height: 1.6;
+      margin-top: 14px;
+    }
+    .expected-output strong { color: #f8fafc; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 6px; }
+
+    /* Level color themes */
+    /* L1 amber */
+    .l1 { border-color: #d97706; }
+    .l1 .level-header { background: linear-gradient(135deg, #78350f, #b45309); }
+    .l1 .level-num    { background: #d97706; }
+    .l1 .level-name   { color: #fde68a; }
+    .l1 .level-tag    { color: #fef3c7; }
+    .l1 .level-pts    { color: #fbbf24; }
+    .l1 .added-bar    { background: rgba(217,119,6,0.12); border: 1px solid rgba(217,119,6,0.3); color: #fbbf24; }
+    .l1 .prompt-box-label { color: #d97706; }
+    .l1 .what-changed { background: rgba(217,119,6,0.08); border: 1px solid rgba(217,119,6,0.25); color: #fef3c7; }
+
+    /* L2 blue */
+    .l2 { border-color: #2563eb; }
+    .l2 .level-header { background: linear-gradient(135deg, #1e3a8a, #1d4ed8); }
+    .l2 .level-num    { background: #3b82f6; }
+    .l2 .level-name   { color: #bfdbfe; }
+    .l2 .level-tag    { color: #dbeafe; }
+    .l2 .level-pts    { color: #60a5fa; }
+    .l2 .added-bar    { background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.3); color: #60a5fa; }
+    .l2 .prompt-box-label { color: #3b82f6; }
+    .l2 .what-changed { background: rgba(59,130,246,0.08); border: 1px solid rgba(59,130,246,0.25); color: #dbeafe; }
+
+    /* L3 green */
+    .l3 { border-color: #059669; }
+    .l3 .level-header { background: linear-gradient(135deg, #064e3b, #065f46); }
+    .l3 .level-num    { background: #10b981; }
+    .l3 .level-name   { color: #a7f3d0; }
+    .l3 .level-tag    { color: #d1fae5; }
+    .l3 .level-pts    { color: #34d399; }
+    .l3 .added-bar    { background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.3); color: #34d399; }
+    .l3 .prompt-box-label { color: #10b981; }
+    .l3 .what-changed { background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.25); color: #d1fae5; }
+
+    /* L4 purple */
+    .l4 { border-color: #7c3aed; }
+    .l4 .level-header { background: linear-gradient(135deg, #3b0764, #4c1d95); }
+    .l4 .level-num    { background: #a855f7; }
+    .l4 .level-name   { color: #e9d5ff; }
+    .l4 .level-tag    { color: #f3e8ff; }
+    .l4 .level-pts    { color: #c084fc; }
+    .l4 .added-bar    { background: rgba(168,85,247,0.1); border: 1px solid rgba(168,85,247,0.3); color: #c084fc; }
+    .l4 .prompt-box-label { color: #a855f7; }
+    .l4 .what-changed { background: rgba(168,85,247,0.08); border: 1px solid rgba(168,85,247,0.25); color: #f3e8ff; }
+
+    /* connector arrow */
+    .arrow-connector {
+      text-align: center;
+      font-size: 28px;
+      color: #334155;
+      margin: -12px 0;
+      line-height: 1;
+    }
+
+    /* ── Footer ── */
+    .footer {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 12px;
+      padding: 20px 32px;
+      text-align: center;
+      font-size: 14px;
+      color: #64748b;
+    }
+    .footer strong { color: #94a3b8; }
+  </style>
+</head>
+<body>
+<div class="doc">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-inner">
+      <div class="header-badge">Prompt Ladder — Worked Example</div>
+      <h1>Sade Strickland's Prompt Ladder</h1>
+      <div class="header-sub">All 4 levels — built on the same real scenario, one upgrade at a time</div>
+      <div class="header-meta">
+        <div class="meta-chip">👤 <span>Sade Strickland</span></div>
+        <div class="meta-chip">🏢 <span>Assistant to the VP of Career &amp; Technical Education (CTE)</span></div>
+        <div class="meta-chip">🏛️ <span>United Federation of Teachers</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCENARIO -->
+  <div class="scenario-strip">
+    <div class="scenario-icon">📌</div>
+    <div>
+      <div class="scenario-label">Sade's Chosen Scenario</div>
+      <div class="scenario-text">Drafting a communication to UFT CTE teachers about an upcoming professional development opportunity</div>
+      <div class="scenario-note">This is the ONE scenario used across all 4 levels. Each level adds a new layer — the prompt is never deleted, only upgraded.</div>
+    </div>
+  </div>
+
+  <!-- INTRO NOTE -->
+  <div class="intro-note">
+    <strong>How to read this page:</strong> Each box shows the <em>complete prompt</em> for that level — color-coded to show exactly what was added. 
+    🟡 Yellow = the core task &nbsp;|&nbsp; 🔵 Blue = context &nbsp;|&nbsp; 🟢 Green = Sade's role + format &nbsp;|&nbsp; 🩵 Teal = persona &nbsp;|&nbsp; 🟠 Orange = constraint.
+    By Level 4, all five colors appear together.
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       LEVEL 1
+  ══════════════════════════════════════════ -->
+  <div class="level-card l1">
+    <div class="level-header">
+      <div class="level-header-left">
+        <div class="level-num">1</div>
+        <div>
+          <div class="level-name">THE BARE ASK</div>
+          <div class="level-tag">One sentence — no context, no role, no format</div>
+        </div>
+      </div>
+      <div class="level-pts">10 PTS</div>
+    </div>
+    <div class="level-body">
+      <div class="added-bar">
+        ✍️ &nbsp;What's added: Just the raw task — nothing else
+      </div>
+
+      <div class="prompt-box">
+        <div class="prompt-box-label">Sade's Level 1 Prompt</div>
+        <div class="prompt-text"><span class="hl-task">Write an email to CTE teachers about an upcoming professional development opportunity.</span></div>
+      </div>
+
+      <div class="annotation-key">
+        <div class="ak-chip"><div class="ak-dot" style="background:#fbbf24;"></div> Task</div>
+      </div>
+
+      <div class="what-changed">
+        <div class="what-changed-icon">⚠️</div>
+        <div><strong>What the AI doesn't know:</strong> Which teachers. What kind of PD. Why it matters to CTE specifically. Who is sending it. How long it should be. What tone is appropriate. The result will be a generic, corporate-sounding email that could come from any organization — not the UFT, and not specifically about CTE.</div>
+      </div>
+
+      <div class="expected-output">
+        <strong>Expected AI Output at this level</strong>
+        A generic 3-paragraph email about "professional development." No UFT voice. No CTE specificity. Words like "Dear Valued Teacher" or "Please be informed." Requires heavy editing to be usable.
+      </div>
+    </div>
+  </div>
+
+  <div class="arrow-connector">↓</div>
+
+  <!-- ══════════════════════════════════════════
+       LEVEL 2
+  ══════════════════════════════════════════ -->
+  <div class="level-card l2">
+    <div class="level-header">
+      <div class="level-header-left">
+        <div class="level-num">2</div>
+        <div>
+          <div class="level-name">TASK + CONTEXT</div>
+          <div class="level-tag">Add WHO, WHY, WHAT must be included</div>
+        </div>
+      </div>
+      <div class="level-pts">25 PTS</div>
+    </div>
+    <div class="level-body">
+      <div class="added-bar">
+        ➕ &nbsp;What's added: WHO the audience is · WHY this PD matters · WHAT must be included
+      </div>
+
+      <div class="prompt-box">
+        <div class="prompt-box-label">Sade's Level 2 Prompt</div>
+        <div class="prompt-text"><span class="hl-task">Write an email to CTE teachers about an upcoming professional development opportunity.</span>
+
+<span class="hl-context">The audience is UFT members who teach Career and Technical Education in New York City public schools — programs like culinary arts, cosmetology, IT, health careers, and construction trades. The PD is a full-day workshop on integrating real-world industry standards into CTE classroom instruction. It is being offered in partnership with the UFT and is free for members. Teachers need to know the date (October 18th), the location (UFT headquarters, 52 Broadway), and that they must register by October 10th. Attendance counts toward their professional learning hours requirement.</span></div>
+      </div>
+
+      <div class="annotation-key">
+        <div class="ak-chip"><div class="ak-dot" style="background:#fbbf24;"></div> Task</div>
+        <div class="ak-chip"><div class="ak-dot" style="background:#60a5fa;"></div> Context (WHO, WHY, WHAT)</div>
+      </div>
+
+      <div class="what-changed">
+        <div class="what-changed-icon">📈</div>
+        <div><strong>What gets better:</strong> The AI now knows the audience (CTE teachers, not generic educators), the specifics of the PD (industry standards, free, one day), logistics (date, location, deadline), and the incentive (PL hours). The email will be significantly more relevant and usable — but it still won't sound like the UFT, and the structure may be unpredictable.</div>
+      </div>
+
+      <div class="expected-output">
+        <strong>Expected AI Output at this level</strong>
+        An email with real details — date, location, deadline, benefits. Audience-appropriate. Still may use generic professional language ("We are pleased to announce...") and the structure (paragraphs vs. bullets) will be whatever the AI guesses. Better, but still needs a formatting pass.
+      </div>
+    </div>
+  </div>
+
+  <div class="arrow-connector">↓</div>
+
+  <!-- ══════════════════════════════════════════
+       LEVEL 3
+  ══════════════════════════════════════════ -->
+  <div class="level-card l3">
+    <div class="level-header">
+      <div class="level-header-left">
+        <div class="level-num">3</div>
+        <div>
+          <div class="level-name">CONTEXT + TASK + FORMAT</div>
+          <div class="level-tag">Add Sade's role + exact output structure</div>
+        </div>
+      </div>
+      <div class="level-pts">40 PTS</div>
+    </div>
+    <div class="level-body">
+      <div class="added-bar">
+        ➕ &nbsp;What's added: Sade's professional role · A specific format instruction
+      </div>
+
+      <div class="prompt-box">
+        <div class="prompt-box-label">Sade's Level 3 Prompt</div>
+        <div class="prompt-text"><span class="hl-role">I am the Assistant to the UFT Vice President of Career and Technical Education. I am drafting this communication on behalf of the CTE department to go out to all UFT CTE teachers across New York City public schools.</span>
+
+<span class="hl-task">Write an email to CTE teachers about an upcoming professional development opportunity.</span>
+
+<span class="hl-context">The audience is UFT members who teach Career and Technical Education — programs like culinary arts, cosmetology, IT, health careers, and construction trades. The PD is a full-day workshop on integrating real-world industry standards into CTE classroom instruction. It is being offered in partnership with the UFT and is free for members. Teachers need to know the date (October 18th), the location (UFT headquarters, 52 Broadway), and that they must register by October 10th. Attendance counts toward their professional learning hours requirement.</span>
+
+<span class="hl-format">Format the email with: a compelling subject line, a warm opening paragraph, a short bulleted section with the key logistics (date, location, deadline, cost, PL hours), one paragraph explaining why this PD is valuable specifically for CTE educators, and a clear call-to-action with a registration link placeholder at the end.</span></div>
+      </div>
+
+      <div class="annotation-key">
+        <div class="ak-chip"><div class="ak-dot" style="background:#fbbf24;"></div> Task</div>
+        <div class="ak-chip"><div class="ak-dot" style="background:#60a5fa;"></div> Context</div>
+        <div class="ak-chip"><div class="ak-dot" style="background:#34d399;"></div> Sade's Role</div>
+        <div class="ak-chip"><div class="ak-dot" style="background:#f0abfc;"></div> Format</div>
+      </div>
+
+      <div class="what-changed">
+        <div class="what-changed-icon">⚡</div>
+        <div><strong>What gets better:</strong> The AI now knows it is writing on behalf of a specific person in a specific role — not anonymously. The format instruction means the output will have a subject line, a bullet list of logistics, a "why this matters for CTE" paragraph, and a CTA. This is now structurally ready to use. The remaining gap: it still doesn't fully sound like the UFT's voice and values.</div>
+      </div>
+
+      <div class="expected-output">
+        <strong>Expected AI Output at this level</strong>
+        A properly structured email: subject line, warm opening, bullet logistics, CTE-specific value paragraph, registration CTA. Very close to ready. Might need a light tone adjustment to feel more "UFT" — but this is the level where most people would actually use the output.
+      </div>
+    </div>
+  </div>
+
+  <div class="arrow-connector">↓</div>
+
+  <!-- ══════════════════════════════════════════
+       LEVEL 4
+  ══════════════════════════════════════════ -->
+  <div class="level-card l4">
+    <div class="level-header">
+      <div class="level-header-left">
+        <div class="level-num">4</div>
+        <div>
+          <div class="level-name">⭐ THE FULL PACKAGE — EXPERT</div>
+          <div class="level-tag">Full persona + constraint = work-ready output, first try</div>
+        </div>
+      </div>
+      <div class="level-pts">50 PTS + VOTE</div>
+    </div>
+    <div class="level-body">
+      <div class="added-bar">
+        ➕ &nbsp;What's added: A full UFT CTE persona · Two guardrail constraints
+      </div>
+
+      <div class="prompt-box">
+        <div class="prompt-box-label">Sade's Level 4 Prompt — The Full Expert Version</div>
+        <div class="prompt-text"><span class="hl-persona">You are a professional communications expert supporting the UFT's Career and Technical Education (CTE) division. You have deep knowledge of NYC's CTE programs — including career pathways in culinary arts, cosmetology, health careers, information technology, construction trades, and business. You understand that UFT CTE teachers are unionized professionals who take pride in their trade expertise and their role in preparing students for industry careers. Your communications reflect the UFT's values: member-centered, empowering, solidarity-focused, and clear. You write in a voice that is warm, collegial, and motivating — never bureaucratic.</span>
+
+<span class="hl-role">I am the Assistant to the UFT Vice President of Career and Technical Education. I am drafting this communication on behalf of the CTE department to go out to all UFT CTE teachers across New York City public schools.</span>
+
+<span class="hl-task">Write an email to CTE teachers about an upcoming professional development opportunity.</span>
+
+<span class="hl-context">The audience is UFT members who teach Career and Technical Education — programs like culinary arts, cosmetology, IT, health careers, and construction trades. The PD is a full-day workshop on integrating real-world industry standards into CTE classroom instruction. It is free for members and offered in partnership with the UFT. Key details: Date: October 18th · Location: UFT Headquarters, 52 Broadway · Registration deadline: October 10th · Attendance counts toward professional learning hours.</span>
+
+<span class="hl-format">Format the email with: a compelling subject line, a warm opening paragraph, a short bulleted section with key logistics (date, location, deadline, cost, PL hours), one paragraph explaining why this PD is valuable specifically for CTE educators, and a clear call-to-action with a registration link placeholder.</span>
+
+<span class="hl-constraint">Constraints: Keep the email under 300 words. Use a warm, collegial tone — avoid bureaucratic language like "please be advised" or "please note." Do not use the phrase "Dear Teacher" — address CTE educators specifically. End with a sign-off from the UFT CTE Department, not a generic signature.</span></div>
+      </div>
+
+      <div class="annotation-key">
+        <div class="ak-chip"><div class="ak-dot" style="background:#fbbf24;"></div> Task</div>
+        <div class="ak-chip"><div class="ak-dot" style="background:#60a5fa;"></div> Context</div>
+        <div class="ak-chip"><div class="ak-dot" style="background:#34d399;"></div> Sade's Role</div>
+        <div class="ak-chip"><div class="ak-dot" style="background:#f0abfc;"></div> Format</div>
+        <div class="ak-chip"><div class="ak-dot" style="background:#7dd3fc;"></div> Persona</div>
+        <div class="ak-chip"><div class="ak-dot" style="background:#fb923c;"></div> Constraints</div>
+      </div>
+
+      <div class="what-changed">
+        <div class="what-changed-icon">🌟</div>
+        <div><strong>What gets better:</strong> The persona tells the AI exactly who it is and what voice to use — UFT values, CTE pride, union solidarity, warm and collegial tone. The constraints eliminate the two most common AI failure modes (generic sign-offs, bureaucratic filler phrases) and set a word count that keeps the email actually readable. This output should be sendable with zero or minimal editing.</div>
+      </div>
+
+      <div class="expected-output">
+        <strong>Expected AI Output at this level</strong>
+        A polished, UFT-voiced email under 300 words with a strong subject line, CTE-specific framing, clean bullet logistics, a compelling "why this matters for your classroom" paragraph, and a proper CTE department sign-off. Colleagues will not know an AI wrote the first draft.
+      </div>
+
+      <!-- Bonus tip -->
+      <div style="margin-top:20px;background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.3);border-radius:10px;padding:16px 20px;font-size:15px;color:#fef3c7;line-height:1.6;">
+        <strong style="color:#fbbf24;">🏆 Bonus challenge:</strong> Try this same Level 4 prompt in both ChatGPT and Claude. Paste both responses to the Padlet. Notice how each AI's voice differs — which one lands closer to the UFT tone? That observation is your first step toward knowing which AI to reach for in the future.
+      </div>
+    </div>
+  </div>
+
+  <!-- PROGRESSION SUMMARY -->
+  <div style="background:#1e293b;border:1px solid #334155;border-radius:14px;padding:32px 36px;">
+    <h3 style="font-size:22px;font-weight:800;margin-bottom:20px;color:#f8fafc;">📊 The Progression at a Glance</h3>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:16px;">
+      <div style="background:#0f172a;border:1px solid #d97706;border-radius:10px;padding:18px;text-align:center;">
+        <div style="font-size:28px;font-weight:900;color:#fbbf24;margin-bottom:6px;">L1</div>
+        <div style="font-size:13px;color:#fde68a;font-weight:700;margin-bottom:8px;">The Bare Ask</div>
+        <div style="font-size:13px;color:#64748b;line-height:1.5;">Generic. Could be anyone. Heavy editing needed.</div>
+      </div>
+      <div style="background:#0f172a;border:1px solid #2563eb;border-radius:10px;padding:18px;text-align:center;">
+        <div style="font-size:28px;font-weight:900;color:#60a5fa;margin-bottom:6px;">L2</div>
+        <div style="font-size:13px;color:#bfdbfe;font-weight:700;margin-bottom:8px;">Task + Context</div>
+        <div style="font-size:13px;color:#64748b;line-height:1.5;">Relevant details. Right audience. Still unpredictable structure.</div>
+      </div>
+      <div style="background:#0f172a;border:1px solid #059669;border-radius:10px;padding:18px;text-align:center;">
+        <div style="font-size:28px;font-weight:900;color:#34d399;margin-bottom:6px;">L3</div>
+        <div style="font-size:13px;color:#a7f3d0;font-weight:700;margin-bottom:8px;">+ Role + Format</div>
+        <div style="font-size:13px;color:#64748b;line-height:1.5;">Properly structured. From Sade's desk. Light tone edit needed.</div>
+      </div>
+      <div style="background:#0f172a;border:1px solid #7c3aed;border-radius:10px;padding:18px;text-align:center;">
+        <div style="font-size:28px;font-weight:900;color:#c084fc;margin-bottom:6px;">L4</div>
+        <div style="font-size:13px;color:#e9d5ff;font-weight:700;margin-bottom:8px;">+ Persona + Constraint</div>
+        <div style="font-size:13px;color:#64748b;line-height:1.5;">On-brand. UFT voice. Work-ready. Minimal to no editing.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <strong>UFT Professional Learning &bull; The Prompt Ladder &bull; Worked Example</strong><br>
+    <span style="margin-top:6px;display:block;">Sade Strickland · Assistant to VP of CTE · United Federation of Teachers · Session 2 Activity</span>
+  </div>
+
+</div>
+</body>
+</html>

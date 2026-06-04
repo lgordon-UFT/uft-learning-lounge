@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>The Prompt Ladder — Live Leaderboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #0a0a1a, #0d1b3e);
+      min-height: 100vh;
+      color: #f8fafc;
+      padding: 40px;
+    }
+
+    .board {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    /* ── Header ── */
+    .board-header {
+      text-align: center;
+      margin-bottom: 48px;
+      position: relative;
+    }
+    .board-badge {
+      display: inline-block;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 8px;
+      padding: 6px 20px;
+      font-size: 13px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: #7dd3fc;
+      margin-bottom: 16px;
+    }
+    .board-header h1 { font-size: 56px; font-weight: 900; background: linear-gradient(135deg,#fff,#7dd3fc); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+    .board-header p { font-size: 20px; color: #94a3b8; margin-top: 8px; }
+
+    /* ── Score columns ── */
+    .point-key {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      margin-bottom: 40px;
+      flex-wrap: wrap;
+    }
+    .pk-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 8px;
+      padding: 8px 18px;
+      font-size: 15px;
+    }
+    .pk-dot { width: 14px; height: 14px; border-radius: 50%; }
+
+    /* ── Table ── */
+    .lb-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0 8px;
+    }
+    .lb-table thead th {
+      padding: 10px 20px;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: #64748b;
+      text-align: left;
+    }
+    .lb-table thead th:last-child,
+    .lb-table thead th:nth-last-child(2) { text-align: center; }
+
+    .lb-row {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
+      transition: background 0.2s;
+    }
+    .lb-row:hover { background: rgba(255,255,255,0.09); }
+
+    .lb-row td {
+      padding: 18px 20px;
+      font-size: 17px;
+      vertical-align: middle;
+    }
+    .lb-row td:first-child { border-radius: 12px 0 0 12px; }
+    .lb-row td:last-child { border-radius: 0 12px 12px 0; text-align: center; }
+
+    .rank-cell { text-align: center !important; width: 60px; }
+    .rank-badge {
+      width: 40px; height: 40px;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; font-weight: 900;
+      margin: 0 auto;
+    }
+    .rank-1 { background: linear-gradient(135deg, #f59e0b, #d97706); color: #000; }
+    .rank-2 { background: linear-gradient(135deg, #94a3b8, #64748b); color: #fff; }
+    .rank-3 { background: linear-gradient(135deg, #d97706, #b45309); color: #fff; }
+    .rank-other { background: rgba(255,255,255,0.1); color: #94a3b8; }
+
+    .name-cell { font-weight: 700; font-size: 18px; }
+    .dept-cell { font-size: 14px; color: #64748b; }
+
+    .level-pips { display: flex; gap: 6px; justify-content: center; }
+    .pip {
+      width: 32px; height: 32px;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; font-weight: 800;
+      border: 2px solid;
+    }
+    .pip-done { }
+    .pip-empty { opacity: 0.25; }
+    .pip-1 { background: rgba(217,119,6,0.15); border-color: #d97706; color: #fbbf24; }
+    .pip-2 { background: rgba(59,130,246,0.15); border-color: #3b82f6; color: #60a5fa; }
+    .pip-3 { background: rgba(16,185,129,0.15); border-color: #10b981; color: #34d399; }
+    .pip-4 { background: rgba(168,85,247,0.15); border-color: #a855f7; color: #c084fc; }
+
+    .bonus-cell { text-align: center !important; }
+    .bonus-tag {
+      display: inline-block;
+      background: rgba(251,191,36,0.15);
+      border: 1px solid rgba(251,191,36,0.4);
+      border-radius: 20px;
+      padding: 3px 10px;
+      font-size: 13px;
+      color: #fbbf24;
+      font-weight: 700;
+    }
+
+    .score-cell { text-align: center !important; }
+    .score-num {
+      font-size: 26px;
+      font-weight: 900;
+    }
+
+    .vote-cell { text-align: center !important; }
+    .vote-star {
+      font-size: 24px;
+    }
+
+    /* ── top row glow ── */
+    .lb-row-1 { box-shadow: 0 0 0 2px rgba(245,158,11,0.4), 0 4px 20px rgba(245,158,11,0.1); }
+    .lb-row-2 { box-shadow: 0 0 0 1px rgba(148,163,184,0.3); }
+    .lb-row-3 { box-shadow: 0 0 0 1px rgba(217,119,6,0.3); }
+
+    /* ── blank rows ── */
+    .blank-row td { padding: 14px 20px; }
+    .blank-line {
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      height: 1px;
+      width: 100%;
+    }
+
+    /* ── Footer ── */
+    .board-footer {
+      margin-top: 40px;
+      text-align: center;
+      font-size: 14px;
+      color: #334155;
+    }
+
+    /* ── Instructions note ── */
+    .instructions {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      padding: 20px 28px;
+      margin-bottom: 32px;
+      font-size: 15px;
+      color: #94a3b8;
+      line-height: 1.7;
+    }
+    .instructions strong { color: #f8fafc; }
+  </style>
+</head>
+<body>
+<div class="board">
+
+  <!-- Header -->
+  <div class="board-header">
+    <div class="board-badge">UFT Professional Learning &bull; Live Leaderboard</div>
+    <h1>🪜 The Prompt Ladder</h1>
+    <p>Tracking everyone's climb from Basic → Expert</p>
+  </div>
+
+  <!-- Instructions for facilitator -->
+  <div class="instructions">
+    <strong>Facilitator instructions:</strong> Update participant names and check off levels as they post to the Padlet. Tally bonuses during the debrief vote. You can display this page on screen as a live scoreboard — or simply use the printed scoring sheet version. Final scores announced after the vote.
+  </div>
+
+  <!-- Point key -->
+  <div class="point-key">
+    <div class="pk-item"><div class="pk-dot" style="background:#d97706;"></div> Level 1 = 10 pts</div>
+    <div class="pk-item"><div class="pk-dot" style="background:#3b82f6;"></div> Level 2 = 25 pts</div>
+    <div class="pk-item"><div class="pk-dot" style="background:#10b981;"></div> Level 3 = 40 pts</div>
+    <div class="pk-item"><div class="pk-dot" style="background:#a855f7;"></div> Level 4 = 50 pts</div>
+    <div class="pk-item"><div class="pk-dot" style="background:#fbbf24;"></div> Bonuses = up to +15 pts</div>
+  </div>
+
+  <!-- Table -->
+  <table class="lb-table">
+    <thead>
+      <tr>
+        <th style="width:60px;text-align:center;">#</th>
+        <th>Name</th>
+        <th>Department</th>
+        <th style="text-align:center;">Levels Completed</th>
+        <th style="text-align:center;">Bonus</th>
+        <th style="text-align:center;">Vote</th>
+        <th style="text-align:center;">Total</th>
+      </tr>
+    </thead>
+    <tbody>
+
+      <!-- Pre-filled example row (1st place placeholder) -->
+      <tr class="lb-row lb-row-1">
+        <td class="rank-cell"><div class="rank-badge rank-1">1</div></td>
+        <td class="name-cell">______________________</td>
+        <td class="dept-cell">_______________</td>
+        <td>
+          <div class="level-pips">
+            <div class="pip pip-1 pip-done">L1</div>
+            <div class="pip pip-2 pip-done">L2</div>
+            <div class="pip pip-3 pip-done">L3</div>
+            <div class="pip pip-4 pip-done">L4</div>
+          </div>
+        </td>
+        <td class="bonus-cell"><span class="bonus-tag">+___ pts</span></td>
+        <td class="vote-cell"><span class="vote-star">⭐</span></td>
+        <td class="score-cell"><span class="score-num" style="color:#fbbf24;">___</span></td>
+      </tr>
+
+      <!-- Row 2 -->
+      <tr class="lb-row lb-row-2">
+        <td class="rank-cell"><div class="rank-badge rank-2">2</div></td>
+        <td class="name-cell">______________________</td>
+        <td class="dept-cell">_______________</td>
+        <td>
+          <div class="level-pips">
+            <div class="pip pip-1 pip-done">L1</div>
+            <div class="pip pip-2 pip-done">L2</div>
+            <div class="pip pip-3 pip-done">L3</div>
+            <div class="pip pip-4 pip-empty">L4</div>
+          </div>
+        </td>
+        <td class="bonus-cell"><span class="bonus-tag">+___ pts</span></td>
+        <td class="vote-cell">—</td>
+        <td class="score-cell"><span class="score-num" style="color:#94a3b8;">___</span></td>
+      </tr>
+
+      <!-- Row 3 -->
+      <tr class="lb-row lb-row-3">
+        <td class="rank-cell"><div class="rank-badge rank-3">3</div></td>
+        <td class="name-cell">______________________</td>
+        <td class="dept-cell">_______________</td>
+        <td>
+          <div class="level-pips">
+            <div class="pip pip-1 pip-done">L1</div>
+            <div class="pip pip-2 pip-done">L2</div>
+            <div class="pip pip-3 pip-done">L3</div>
+            <div class="pip pip-4 pip-empty">L4</div>
+          </div>
+        </td>
+        <td class="bonus-cell">—</td>
+        <td class="vote-cell">—</td>
+        <td class="score-cell"><span class="score-num" style="color:#d97706;">___</span></td>
+      </tr>
+
+      <!-- Blank rows 4–12 -->
+      <tr class="lb-row">
+        <td class="rank-cell"><div class="rank-badge rank-other">4</div></td>
+        <td class="name-cell">______________________</td>
+        <td class="dept-cell">_______________</td>
+        <td><div class="level-pips"><div class="pip pip-1 pip-empty">L1</div><div class="pip pip-2 pip-empty">L2</div><div class="pip pip-3 pip-empty">L3</div><div class="pip pip-4 pip-empty">L4</div></div></td>
+        <td class="bonus-cell">—</td><td class="vote-cell">—</td>
+        <td class="score-cell"><span class="score-num" style="color:#475569;">___</span></td>
+      </tr>
+      <tr class="lb-row">
+        <td class="rank-cell"><div class="rank-badge rank-other">5</div></td>
+        <td class="name-cell">______________________</td>
+        <td class="dept-cell">_______________</td>
+        <td><div class="level-pips"><div class="pip pip-1 pip-empty">L1</div><div class="pip pip-2 pip-empty">L2</div><div class="pip pip-3 pip-empty">L3</div><div class="pip pip-4 pip-empty">L4</div></div></td>
+        <td class="bonus-cell">—</td><td class="vote-cell">—</td>
+        <td class="score-cell"><span class="score-num" style="color:#475569;">___</span></td>
+      </tr>
+      <tr class="lb-row">
+        <td class="rank-cell"><div class="rank-badge rank-other">6</div></td>
+        <td class="name-cell">______________________</td>
+        <td class="dept-cell">_______________</td>
+        <td><div class="level-pips"><div class="pip pip-1 pip-empty">L1</div><div class="pip pip-2 pip-empty">L2</div><div class="pip pip-3 pip-empty">L3</div><div class="pip pip-4 pip-empty">L4</div></div></td>
+        <td class="bonus-cell">—</td><td class="vote-cell">—</td>
+        <td class="score-cell"><span class="score-num" style="color:#475569;">___</span></td>
+      </tr>
+      <tr class="lb-row">
+        <td class="rank-cell"><div class="rank-badge rank-other">7</div></td>
+        <td class="name-cell">______________________</td>
+        <td class="dept-cell">_______________</td>
+        <td><div class="level-pips"><div class="pip pip-1 pip-empty">L1</div><div class="pip pip-2 pip-empty">L2</div><div class="pip pip-3 pip-empty">L3</div><div class="pip pip-4 pip-empty">L4</div></div></td>
+        <td class="bonus-cell">—</td><td class="vote-cell">—</td>
+        <td class="score-cell"><span class="score-num" style="color:#475569;">___</span></td>
+      </tr>
+      <tr class="lb-row">
+        <td class="rank-cell"><div class="rank-badge rank-other">8</div></td>
+        <td class="name-cell">______________________</td>
+        <td class="dept-cell">_______________</td>
+        <td><div class="level-pips"><div class="pip pip-1 pip-empty">L1</div><div class="pip pip-2 pip-empty">L2</div><div class="pip pip-3 pip-empty">L3</div><div class="pip pip-4 pip-empty">L4</div></div></td>
+        <td class="bonus-cell">—</td><td class="vote-cell">—</td>
+        <td class="score-cell"><span class="score-num" style="color:#475569;">___</span></td>
+      </tr>
+      <tr class="lb-row">
+        <td class="rank-cell"><div class="rank-badge rank-other">9</div></td>
+        <td class="name-cell">______________________</td>
+        <td class="dept-cell">_______________</td>
+        <td><div class="level-pips"><div class="pip pip-1 pip-empty">L1</div><div class="pip pip-2 pip-empty">L2</div><div class="pip pip-3 pip-empty">L3</div><div class="pip pip-4 pip-empty">L4</div></div></td>
+        <td class="bonus-cell">—</td><td class="vote-cell">—</td>
+        <td class="score-cell"><span class="score-num" style="color:#475569;">___</span></td>
+      </tr>
+      <tr class="lb-row">
+        <td class="rank-cell"><div class="rank-badge rank-other">10</div></td>
+        <td class="name-cell">______________________</td>
+        <td class="dept-cell">_______________</td>
+        <td><div class="level-pips"><div class="pip pip-1 pip-empty">L1</div><div class="pip pip-2 pip-empty">L2</div><div class="pip pip-3 pip-empty">L3</div><div class="pip pip-4 pip-empty">L4</div></div></td>
+        <td class="bonus-cell">—</td><td class="vote-cell">—</td>
+        <td class="score-cell"><span class="score-num" style="color:#475569;">___</span></td>
+      </tr>
+
+    </tbody>
+  </table>
+
+  <div class="board-footer">
+    UFT Professional Learning &bull; The Prompt Ladder &bull; Session 2 Activity
+  </div>
+</div>
+</body>
+</html>

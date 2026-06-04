@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>The Prompt Ladder — Facilitator Guide</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #f0f4f8;
+      color: #1e293b;
+      padding: 40px 32px;
+    }
+    @media print {
+      body { padding: 0; background: #fff; }
+      .card { box-shadow: none !important; }
+      .no-print { display: none; }
+    }
+
+    .doc {
+      max-width: 900px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+
+    /* ── Header ── */
+    .doc-header {
+      background: linear-gradient(135deg, #002855, #0057a8);
+      color: #fff;
+      border-radius: 16px;
+      padding: 40px 48px;
+      position: relative;
+      overflow: hidden;
+    }
+    .doc-header::before {
+      content: '';
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      background-image: repeating-linear-gradient(45deg, rgba(255,255,255,0.04) 0, rgba(255,255,255,0.04) 1px, transparent 0, transparent 50%);
+      background-size: 24px 24px;
+    }
+    .doc-header-inner { position: relative; }
+    .doc-badge {
+      display: inline-block;
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 6px;
+      padding: 4px 14px;
+      font-size: 12px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: #a8d4ff;
+      margin-bottom: 14px;
+    }
+    .doc-header h1 { font-size: 42px; font-weight: 900; margin-bottom: 8px; }
+    .doc-header p { font-size: 17px; color: #c8e6ff; max-width: 600px; line-height: 1.6; }
+
+    /* ── Card ── */
+    .card {
+      background: #fff;
+      border-radius: 14px;
+      box-shadow: 0 2px 20px rgba(0,0,0,0.08);
+      overflow: hidden;
+    }
+    .card-head {
+      padding: 20px 32px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .card-head h2 { font-size: 22px; font-weight: 800; }
+    .card-head p { font-size: 14px; color: #64748b; margin-top: 2px; }
+    .card-body { padding: 24px 32px; }
+
+    /* ── Timeline table ── */
+    .timeline { width: 100%; border-collapse: separate; border-spacing: 0; }
+    .timeline th {
+      padding: 10px 16px;
+      font-size: 12px; font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      background: #f8fafc;
+      border-bottom: 2px solid #e2e8f0;
+      text-align: left;
+    }
+    .timeline td {
+      padding: 14px 16px;
+      font-size: 15px;
+      border-bottom: 1px solid #f1f5f9;
+      vertical-align: top;
+      line-height: 1.6;
+    }
+    .timeline tr:last-child td { border-bottom: none; }
+    .time-badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .phase-label {
+      font-weight: 700;
+      font-size: 15px;
+    }
+    .td-action { color: #374151; }
+    .td-say { color: #0057a8; font-style: italic; }
+    .td-watch { color: #dc2626; }
+
+    /* ── Script blocks ── */
+    .script-block {
+      background: #eff6ff;
+      border-left: 4px solid #3b82f6;
+      border-radius: 0 8px 8px 0;
+      padding: 16px 20px;
+      margin: 12px 0;
+      font-size: 15px;
+      color: #1e40af;
+      font-style: italic;
+      line-height: 1.7;
+    }
+    .script-block strong {
+      display: block;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: #3b82f6;
+      font-style: normal;
+      margin-bottom: 6px;
+    }
+
+    /* ── Alert ── */
+    .alert {
+      border-radius: 10px;
+      padding: 14px 20px;
+      font-size: 15px;
+      line-height: 1.6;
+      margin: 12px 0;
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+    }
+    .alert-warn { background: #fefce8; border: 1px solid #fde047; color: #854d0e; }
+    .alert-tip  { background: #f0fdf4; border: 1px solid #86efac; color: #14532d; }
+    .alert-info { background: #eff6ff; border: 1px solid #bfdbfe; color: #1e40af; }
+    .alert-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+
+    /* ── Level strip ── */
+    .level-strip {
+      display: flex;
+      align-items: stretch;
+      gap: 0;
+      margin-bottom: 18px;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid #e2e8f0;
+    }
+    .level-strip-num {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 60px;
+      font-size: 28px;
+      font-weight: 900;
+      color: #fff;
+      flex-shrink: 0;
+    }
+    .level-strip-content {
+      padding: 14px 20px;
+      flex: 1;
+    }
+    .level-strip-content h3 { font-size: 17px; font-weight: 700; margin-bottom: 6px; }
+    .level-strip-content p { font-size: 14px; color: #475569; line-height: 1.6; }
+    .level-strip-pts {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 20px;
+      font-size: 20px;
+      font-weight: 900;
+      flex-shrink: 0;
+    }
+    .ls-1 .level-strip-num { background: #d97706; }
+    .ls-1 .level-strip-pts { color: #d97706; }
+    .ls-2 .level-strip-num { background: #2563eb; }
+    .ls-2 .level-strip-pts { color: #2563eb; }
+    .ls-3 .level-strip-num { background: #059669; }
+    .ls-3 .level-strip-pts { color: #059669; }
+    .ls-4 .level-strip-num { background: #7c3aed; }
+    .ls-4 .level-strip-pts { color: #7c3aed; }
+
+    /* ── Debrief questions ── */
+    .debrief-q {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 16px 20px;
+      margin-bottom: 12px;
+    }
+    .debrief-q .q { font-size: 16px; font-weight: 700; color: #1e293b; margin-bottom: 6px; }
+    .debrief-q .follow { font-size: 14px; color: #64748b; }
+
+    /* ── Troubleshoot ── */
+    .trouble-row { display: flex; gap: 20px; margin-bottom: 14px; align-items: flex-start; }
+    .trouble-prob { flex: 1; background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 12px 16px; font-size: 14px; color: #991b1b; }
+    .trouble-fix  { flex: 2; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 12px 16px; font-size: 14px; color: #14532d; }
+
+    /* ── Checklist ── */
+    .checklist { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+    .checklist li { display: flex; align-items: flex-start; gap: 10px; font-size: 15px; color: #374151; line-height: 1.5; }
+    .checklist li::before { content: '☐'; font-size: 18px; color: #94a3b8; flex-shrink: 0; }
+
+    /* ── Footer ── */
+    .doc-footer {
+      background: #1e293b;
+      color: #94a3b8;
+      border-radius: 12px;
+      padding: 20px 32px;
+      font-size: 13px;
+      text-align: center;
+    }
+    .doc-footer strong { color: #f8fafc; }
+
+    hr { border: none; border-top: 1px solid #e2e8f0; margin: 6px 0; }
+  </style>
+</head>
+<body>
+<div class="doc">
+
+  <!-- Header -->
+  <div class="doc-header">
+    <div class="doc-header-inner">
+      <div class="doc-badge">For Facilitators Only</div>
+      <h1>🪜 The Prompt Ladder — Facilitator Guide</h1>
+      <p>Complete run-of-show, timing, scripts, debrief questions, and troubleshooting for the UFT Prompt Ladder activity.</p>
+    </div>
+  </div>
+
+  <!-- ── AT A GLANCE ── -->
+  <div class="card">
+    <div class="card-head" style="background:#f8fafc;border-bottom:1px solid #e2e8f0;">
+      <div>
+        <h2>📋 At a Glance</h2>
+        <p>Everything you need to know before you begin</p>
+      </div>
+    </div>
+    <div class="card-body">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:16px;margin-bottom:20px;">
+        <div style="background:#eff6ff;border-radius:10px;padding:16px;text-align:center;">
+          <div style="font-size:28px;font-weight:900;color:#0057a8;">25–30</div>
+          <div style="font-size:12px;color:#64748b;text-transform:uppercase;letter-spacing:1px;margin-top:4px;">Minutes Total</div>
+        </div>
+        <div style="background:#f0fdf4;border-radius:10px;padding:16px;text-align:center;">
+          <div style="font-size:28px;font-weight:900;color:#059669;">4</div>
+          <div style="font-size:12px;color:#64748b;text-transform:uppercase;letter-spacing:1px;margin-top:4px;">Levels / Rounds</div>
+        </div>
+        <div style="background:#fefce8;border-radius:10px;padding:16px;text-align:center;">
+          <div style="font-size:28px;font-weight:900;color:#d97706;">Solo</div>
+          <div style="font-size:12px;color:#64748b;text-transform:uppercase;letter-spacing:1px;margin-top:4px;">Individual Work</div>
+        </div>
+        <div style="background:#faf5ff;border-radius:10px;padding:16px;text-align:center;">
+          <div style="font-size:28px;font-weight:900;color:#7c3aed;">125</div>
+          <div style="font-size:12px;color:#64748b;text-transform:uppercase;letter-spacing:1px;margin-top:4px;">Max Points</div>
+        </div>
+      </div>
+      <div class="alert alert-info">
+        <div class="alert-icon">ℹ️</div>
+        <div><strong>Core mechanic:</strong> Each participant picks ONE real task from their own job and rewrites the same prompt 4 times, adding a new ingredient each round. By Level 4, they have built a persona-powered, format-specified, constraint-guarded expert prompt — starting from a bare one-liner.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SETUP CHECKLIST ── -->
+  <div class="card">
+    <div class="card-head" style="background:#f8fafc;border-bottom:1px solid #e2e8f0;">
+      <div><h2>✅ Before You Start — Setup Checklist</h2></div>
+    </div>
+    <div class="card-body">
+      <ul class="checklist">
+        <li>Padlet (or Google Doc) is open and the link is ready to paste into chat — participants need this URL before Level 1</li>
+        <li>Presentation slides are on screen (Prompt Ladder deck, start at Slide 1)</li>
+        <li>Participant cards are either printed OR the URL is shared in chat</li>
+        <li>Timer app or phone is ready (you'll time each round)</li>
+        <li>You have tested the Padlet yourself — can participants post without an account? (Anonymous mode recommended)</li>
+        <li>Participants have their UFT persona from the Session 2 resource page saved and accessible — remind them before Level 4</li>
+        <li>You have a brief example prompt in your back pocket for each level, in case participants freeze</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ── RUN OF SHOW ── -->
+  <div class="card">
+    <div class="card-head" style="background:#f8fafc;border-bottom:1px solid #e2e8f0;">
+      <div><h2>⏱️ Run of Show — Minute by Minute</h2></div>
+    </div>
+    <div class="card-body">
+      <table class="timeline">
+        <thead>
+          <tr>
+            <th style="width:100px;">Time</th>
+            <th style="width:160px;">Phase</th>
+            <th>Facilitator Action</th>
+            <th style="width:180px;">Watch For</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="time-badge" style="background:#dbeafe;color:#1e40af;">0:00–3:00</span></td>
+            <td><span class="phase-label">Launch &amp; Orient</span></td>
+            <td class="td-action">Show Slide 1 (title). Distribute or share participant card link. Read the game concept aloud. Share the Padlet link in chat.</td>
+            <td class="td-watch">Make sure everyone can access the Padlet before starting.</td>
+          </tr>
+          <tr>
+            <td><span class="time-badge" style="background:#dbeafe;color:#1e40af;">3:00–5:00</span></td>
+            <td><span class="phase-label">How to Play</span></td>
+            <td class="td-action">Show Slide 2 (rules). Walk through the 4 steps and point system. Emphasize: "Build on it — never start over." Answer questions.</td>
+            <td class="td-watch">Clarify the scenario step — participants should pick a REAL task, not an imaginary one.</td>
+          </tr>
+          <tr>
+            <td><span class="time-badge" style="background:#dbeafe;color:#1e40af;">5:00–7:00</span></td>
+            <td><span class="phase-label">Ladder Overview</span></td>
+            <td class="td-action">Show Slide 3 (all 4 levels). Give them 60 seconds to pick their scenario and write it on their card.</td>
+            <td class="td-watch">Some participants freeze here. Prompt: "What is ONE thing you had to write or explain to someone last week?"</td>
+          </tr>
+          <tr style="background:#fefce8;">
+            <td><span class="time-badge" style="background:#fde68a;color:#92400e;">7:00–12:00</span></td>
+            <td><span class="phase-label" style="color:#b45309;">🪜 Level 1</span></td>
+            <td class="td-action">Show Slide 4. Start 5-min timer (visible). Circulate/monitor. At 4:00, give a "1 minute left" callout. Remind them to paste to Padlet.</td>
+            <td class="td-watch">Participants who write a paragraph instead of a sentence — gently redirect. "Make it shorter — one sentence is the goal."</td>
+          </tr>
+          <tr style="background:#eff6ff;">
+            <td><span class="time-badge" style="background:#bfdbfe;color:#1e40af;">12:00–17:00</span></td>
+            <td><span class="phase-label" style="color:#1d4ed8;">🪜 Level 2</span></td>
+            <td class="td-action">Show Slide 5. Remind: "Don't delete your Level 1 prompt — add to it." Start 5-min timer. At 3:00, prompt: "Have you added WHO this is for?"</td>
+            <td class="td-watch">Participants adding too little. Encourage at least 2 context tags from the card.</td>
+          </tr>
+          <tr style="background:#f0fdf4;">
+            <td><span class="time-badge" style="background:#bbf7d0;color:#065f46;">17:00–22:00</span></td>
+            <td><span class="phase-label" style="color:#059669;">🪜 Level 3</span></td>
+            <td class="td-action">Show Slide 6. Remind them to add their own role AND a format. Start 5-min timer. Call out format options at the 2-min mark.</td>
+            <td class="td-watch">Participants who skip the format. This is the most common miss — nudge: "Tell it HOW to structure the response."</td>
+          </tr>
+          <tr style="background:#faf5ff;">
+            <td><span class="time-badge" style="background:#e9d5ff;color:#5b21b6;">22:00–29:00</span></td>
+            <td><span class="phase-label" style="color:#7c3aed;">⭐ Level 4</span></td>
+            <td class="td-action">Show Slide 7. Remind participants to pull up their persona. Start 7-min timer. At 3 min, remind bonus: "If you have time, try it in the other AI too." Announce voting at 1 min remaining.</td>
+            <td class="td-watch">Participants who haven't saved their persona — they can write a short version on the spot (2–3 sentences is fine).</td>
+          </tr>
+          <tr>
+            <td><span class="time-badge" style="background:#dcfce7;color:#14532d;">29:00–35:00</span></td>
+            <td><span class="phase-label">Vote &amp; Debrief</span></td>
+            <td class="td-action">Show Slide 8. Pull up the Padlet. Read 2–3 Level 4 entries aloud. Facilitate the vote (emoji reaction or hand raise). Announce winner. Run debrief questions.</td>
+            <td class="td-watch">Keep energy up — celebrate the winner AND the improvement shown from Level 1 to Level 4.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ── FACILITATOR SCRIPTS ── -->
+  <div class="card">
+    <div class="card-head" style="background:#f8fafc;border-bottom:1px solid #e2e8f0;">
+      <div><h2>🎙️ Facilitator Scripts</h2><p>Word-for-word language you can use at each key moment</p></div>
+    </div>
+    <div class="card-body">
+
+      <p style="font-size:15px;font-weight:700;color:#374151;margin-bottom:8px;">Opening (0:00)</p>
+      <div class="script-block">
+        <strong>Say this:</strong>
+        "We're going to do a quick activity called The Prompt Ladder. The goal is simple: you're going to write the same prompt four times — starting bare bones and upgrading it each round. By the end, you'll have a real, work-ready prompt that you can actually use at the UFT. No pairs, no groups — just you and your AI tool. Pick a task you genuinely do at work, and let's climb."
+      </div>
+
+      <p style="font-size:15px;font-weight:700;color:#374151;margin-bottom:8px;margin-top:16px;">Starting each level</p>
+      <div class="script-block">
+        <strong>Level 1:</strong>
+        "Level 1 — The Bare Ask. I want you to write the simplest version of your task you possibly can. One sentence. No context, no formatting, no role. Just ask for the thing. You have 5 minutes — go."
+      </div>
+      <div class="script-block">
+        <strong>Level 2:</strong>
+        "Level 2 — Task plus Context. Don't delete what you wrote. Add to it. Tell the AI who this is for, why it's needed, and what needs to be included. At least two of those. Five minutes — go."
+      </div>
+      <div class="script-block">
+        <strong>Level 3:</strong>
+        "Level 3 — adding your role and a format instruction. Tell the AI who YOU are — 'I am a UFT blank-blank.' And tell it how to structure the output. Email? Bullet list? FAQ? Pick one and add it. Five minutes."
+      </div>
+      <div class="script-block">
+        <strong>Level 4:</strong>
+        "Last level — this is the expert round. Two moves: add your UFT persona from the resource page, and add at least one constraint — a rule the AI must follow. You have 7 minutes. And if you finish early, try it in the other AI and see what happens. Bonus points if you do."
+      </div>
+
+      <p style="font-size:15px;font-weight:700;color:#374151;margin-bottom:8px;margin-top:16px;">Announcing the vote</p>
+      <div class="script-block">
+        <strong>Say this:</strong>
+        "Okay — pencils down. Let's look at the Padlet together. I'm going to read a few of the Level 4 entries out loud. After I read them, I want you to vote — emoji react, raise your hand, or drop a name in chat — for the output that you think is most ready to actually send or use. Most useful, most on-brand, least amount of editing needed."
+      </div>
+
+      <p style="font-size:15px;font-weight:700;color:#374151;margin-bottom:8px;margin-top:16px;">Wrapping up</p>
+      <div class="script-block">
+        <strong>Say this:</strong>
+        "Here's what just happened. You started with a sentence that could have come from anyone on the internet. You ended with something that sounds like YOUR department, for YOUR audience, in YOUR voice. The difference isn't the AI — the difference is the prompt. That's the whole point of this series."
+      </div>
+    </div>
+  </div>
+
+  <!-- ── LEVELS REFERENCE ── -->
+  <div class="card">
+    <div class="card-head" style="background:#f8fafc;border-bottom:1px solid #e2e8f0;">
+      <div><h2>🪜 Level-by-Level Reference</h2><p>What participants add at each step and what to look for</p></div>
+    </div>
+    <div class="card-body">
+
+      <div class="level-strip ls-1">
+        <div class="level-strip-num">1</div>
+        <div class="level-strip-content">
+          <h3>THE BARE ASK — 10 pts</h3>
+          <p><strong>Element added:</strong> Nothing — this is the starting baseline. Raw, context-free ask.<br>
+          <strong>Expected output:</strong> Generic. Could be from any organization. No union voice, no audience specificity.<br>
+          <strong>Purpose:</strong> Creates a baseline so participants can visually see how much the prompt improves.</p>
+        </div>
+        <div class="level-strip-pts">10 pts</div>
+      </div>
+
+      <div class="level-strip ls-2">
+        <div class="level-strip-num">2</div>
+        <div class="level-strip-content">
+          <h3>TASK + CONTEXT — 25 pts</h3>
+          <p><strong>Element added:</strong> WHO it's for, WHY it's needed, WHAT must be included, WHERE it will be used.<br>
+          <strong>Expected output:</strong> Noticeably more specific. Audience-relevant. Still may lack UFT tone or structure.<br>
+          <strong>Watch for:</strong> Participants adding only one context tag. Encourage at least two.</p>
+        </div>
+        <div class="level-strip-pts">25 pts</div>
+      </div>
+
+      <div class="level-strip ls-3">
+        <div class="level-strip-num">3</div>
+        <div class="level-strip-content">
+          <h3>CONTEXT + TASK + FORMAT — 40 pts</h3>
+          <p><strong>Element added:</strong> Their own professional role + explicit format instruction (email, list, FAQ, table, etc.)<br>
+          <strong>Expected output:</strong> Structured, scannable, immediately usable format. Starting to sound more professional.<br>
+          <strong>Watch for:</strong> Participants skipping the format instruction — this is the most commonly missed step.</p>
+        </div>
+        <div class="level-strip-pts">40 pts</div>
+      </div>
+
+      <div class="level-strip ls-4">
+        <div class="level-strip-num">4</div>
+        <div class="level-strip-content">
+          <h3>THE FULL PACKAGE — 50 pts + VOTE</h3>
+          <p><strong>Element added:</strong> Full UFT persona (from Session 2 resource page) + at least one constraint rule.<br>
+          <strong>Expected output:</strong> On-brand, audience-specific, structured, constrained — genuinely work-ready output.<br>
+          <strong>Watch for:</strong> Participants without their persona saved. A short 2–3 sentence version is fine.</p>
+        </div>
+        <div class="level-strip-pts">50+</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── DEBRIEF QUESTIONS ── -->
+  <div class="card">
+    <div class="card-head" style="background:#f8fafc;border-bottom:1px solid #e2e8f0;">
+      <div><h2>💬 Debrief Discussion Questions</h2><p>5–8 minutes. Pick 2–3 based on energy in the room.</p></div>
+    </div>
+    <div class="card-body">
+      <div class="debrief-q">
+        <div class="q">1. Look at the Padlet — compare a Level 1 and Level 4 entry from the same person. What specifically changed?</div>
+        <div class="follow">Follow-up: Was the change what you expected, or were you surprised?</div>
+      </div>
+      <div class="debrief-q">
+        <div class="q">2. At which level did the AI response start to feel like it could be from the UFT — not just any organization?</div>
+        <div class="follow">Follow-up: What was the specific ingredient that made that shift happen?</div>
+      </div>
+      <div class="debrief-q">
+        <div class="q">3. For those who tried both ChatGPT and Claude with the same Level 4 prompt: what was different?</div>
+        <div class="follow">Follow-up: Did one feel more "UFT" than the other? Why might that be?</div>
+      </div>
+      <div class="debrief-q">
+        <div class="q">4. Which level produced output you could use at work this week with the least editing?</div>
+        <div class="follow">Follow-up: What would you still need to change before sending it?</div>
+      </div>
+      <div class="debrief-q">
+        <div class="q">5. What do you notice about the constraint you added in Level 4? Did the AI follow it?</div>
+        <div class="follow">Follow-up: What happens if the AI ignores your constraint? (Answer: add it again more explicitly, or ask it to try again.)</div>
+      </div>
+      <div class="debrief-q">
+        <div class="q">6. Thinking about your daily work — when would you realistically use a Level 4 prompt vs. a Level 2 prompt?</div>
+        <div class="follow">Follow-up: Not every task needs a full Level 4. When is "good enough" actually good enough?</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── TROUBLESHOOTING ── -->
+  <div class="card">
+    <div class="card-head" style="background:#f8fafc;border-bottom:1px solid #e2e8f0;">
+      <div><h2>🛠️ Troubleshooting — Common Problems</h2></div>
+    </div>
+    <div class="card-body">
+      <div class="trouble-row">
+        <div class="trouble-prob">❌ "I can't think of a scenario."</div>
+        <div class="trouble-fix">✅ Prompt them: "What is ONE email, document, or explanation you had to write in the last two weeks? Start there." If still stuck: use "write an email to a new member explaining their benefits."</div>
+      </div>
+      <div class="trouble-row">
+        <div class="trouble-prob">❌ Participant keeps starting over instead of building on the prompt.</div>
+        <div class="trouble-fix">✅ Physically show them on screen: "Take your Level 2 prompt — paste it here, then add one more sentence at the top or bottom. That's it."</div>
+      </div>
+      <div class="trouble-row">
+        <div class="trouble-prob">❌ "My AI keeps giving the same kind of answer no matter what I add."</div>
+        <div class="trouble-fix">✅ Often means the context is too vague. Help them be more specific — "teachers" is better than "people," "open enrollment email" is better than "communication."</div>
+      </div>
+      <div class="trouble-row">
+        <div class="trouble-prob">❌ Participant doesn't have their persona from Session 2.</div>
+        <div class="trouble-fix">✅ Direct them to the Session 2 Resource Page link in chat. If they don't have it, have them write a quick 2–3 sentence version: "You are a UFT [role] with expertise in [topics]. Your audience is [who]. Use a [tone] tone."</div>
+      </div>
+      <div class="trouble-row">
+        <div class="trouble-prob">❌ Some participants finish all 4 levels early.</div>
+        <div class="trouble-fix">✅ Great — encourage them to: (a) try the same Level 4 prompt in the other AI, (b) add a second constraint and see what changes, or (c) help a neighbor who is stuck.</div>
+      </div>
+      <div class="trouble-row">
+        <div class="trouble-prob">❌ Padlet is loading slowly or someone can't post.</div>
+        <div class="trouble-fix">✅ Have a backup: a shared Google Doc with pre-labeled sections (Level 1, 2, 3, 4) where participants can paste into comments.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SCORING ── -->
+  <div class="card">
+    <div class="card-head" style="background:#f8fafc;border-bottom:1px solid #e2e8f0;">
+      <div><h2>🏆 Scoring Summary</h2></div>
+    </div>
+    <div class="card-body">
+      <table class="timeline">
+        <thead>
+          <tr>
+            <th>Action</th>
+            <th>Points</th>
+            <th>Verified By</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Complete Level 1 + paste to Padlet</td>
+            <td><strong>10 pts</strong></td>
+            <td>Padlet post visible</td>
+          </tr>
+          <tr>
+            <td>Complete Level 2 + paste to Padlet</td>
+            <td><strong>25 pts</strong></td>
+            <td>Padlet post visible</td>
+          </tr>
+          <tr>
+            <td>Complete Level 3 + paste to Padlet</td>
+            <td><strong>40 pts</strong></td>
+            <td>Padlet post visible</td>
+          </tr>
+          <tr>
+            <td>Complete Level 4 + paste to Padlet</td>
+            <td><strong>50 pts</strong></td>
+            <td>Padlet post visible</td>
+          </tr>
+          <tr style="background:#fefce8;">
+            <td>BONUS: Voted best Level 4 output by group</td>
+            <td><strong>+5 pts</strong></td>
+            <td>Group vote during debrief</td>
+          </tr>
+          <tr style="background:#fefce8;">
+            <td>BONUS: Finished all 4 levels before time called</td>
+            <td><strong>+5 pts</strong></td>
+            <td>Facilitator callout</td>
+          </tr>
+          <tr style="background:#fefce8;">
+            <td>BONUS: Tried same prompt in both ChatGPT AND Claude</td>
+            <td><strong>+5 pts</strong></td>
+            <td>Self-reported in chat/Padlet</td>
+          </tr>
+          <tr style="background:#f0fdf4;font-weight:700;">
+            <td>Maximum possible score</td>
+            <td><strong>125 pts</strong></td>
+            <td></td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="alert alert-tip" style="margin-top:16px;">
+        <div class="alert-icon">💡</div>
+        <div>Points are motivational, not evaluative. The real goal is the progression — participants seeing with their own eyes how a bare prompt becomes a work-ready asset through intentional layering.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="doc-footer">
+    <strong>UFT Professional Learning &bull; The Prompt Ladder — Facilitator Guide</strong><br>
+    <span style="margin-top:6px;display:block;">Session 2 of 2 &bull; AI for UFT Staff &bull; Activity duration: 25–30 minutes</span>
+  </div>
+
+</div><!-- /doc -->
+</body>
+</html>

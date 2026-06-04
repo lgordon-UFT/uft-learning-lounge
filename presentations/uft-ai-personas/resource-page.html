@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UFT AI Personas — Resource Page</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #0f172a;
+      color: #f8fafc;
+      min-height: 100vh;
+      padding: 0;
+    }
+
+    /* ── Header ── */
+    .header {
+      background: linear-gradient(135deg, #002855, #0057a8);
+      padding: 48px 80px;
+      position: relative;
+      overflow: hidden;
+    }
+    .header::before {
+      content: '';
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      background-image: repeating-linear-gradient(45deg, rgba(255,255,255,0.04) 0, rgba(255,255,255,0.04) 1px, transparent 0, transparent 50%);
+      background-size: 28px 28px;
+    }
+    .header-inner { position: relative; max-width: 1200px; margin: 0 auto; }
+    .header-badge {
+      display: inline-block;
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 8px;
+      padding: 6px 18px;
+      font-size: 13px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: #a8d4ff;
+      margin-bottom: 20px;
+    }
+    .header h1 { font-size: 52px; font-weight: 900; line-height: 1.1; margin-bottom: 12px; }
+    .header p { font-size: 20px; color: #c8e6ff; max-width: 720px; line-height: 1.6; }
+
+    /* ── Main layout ── */
+    .main { max-width: 1200px; margin: 0 auto; padding: 60px 40px; }
+
+    /* ── Section headers ── */
+    .section-header { margin-bottom: 32px; }
+    .section-header h2 { font-size: 36px; font-weight: 800; margin-bottom: 8px; }
+    .section-header .underline {
+      width: 60px; height: 4px; border-radius: 4px;
+      background: linear-gradient(90deg, #0057a8, #00aaff);
+    }
+    .section-header p { font-size: 18px; color: #94a3b8; margin-top: 12px; line-height: 1.6; }
+
+    /* ── Persona template card ── */
+    .persona-template {
+      background: #1e293b;
+      border: 2px solid #334155;
+      border-radius: 16px;
+      padding: 40px;
+      margin-bottom: 48px;
+    }
+    .persona-template h3 {
+      font-size: 22px; font-weight: 700; color: #f59e0b;
+      text-transform: uppercase; letter-spacing: 2px; margin-bottom: 20px;
+    }
+    .template-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 28px;
+    }
+    .template-field {
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 10px;
+      padding: 20px 24px;
+    }
+    .template-field label {
+      display: block;
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: #60a5fa;
+      margin-bottom: 8px;
+    }
+    .template-field p { font-size: 16px; color: #cbd5e1; line-height: 1.6; }
+    .template-field .placeholder {
+      color: #475569;
+      font-style: italic;
+    }
+    .persona-full {
+      background: #0d1117;
+      border: 1px solid #1f2937;
+      border-radius: 10px;
+      padding: 28px;
+      font-family: monospace;
+      font-size: 15px;
+      line-height: 1.8;
+      color: #e2e8f0;
+      white-space: pre-wrap;
+      margin-bottom: 16px;
+    }
+    .copy-note {
+      font-size: 14px; color: #64748b;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .copy-note::before { content: '💡'; }
+
+    /* ── Steps ── */
+    .platform-block {
+      background: #1e293b;
+      border: 2px solid #334155;
+      border-radius: 16px;
+      padding: 40px;
+      margin-bottom: 40px;
+    }
+    .platform-header {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin-bottom: 32px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid #334155;
+    }
+    .platform-icon {
+      width: 64px; height: 64px;
+      border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 32px;
+      flex-shrink: 0;
+    }
+    .platform-header h2 { font-size: 30px; font-weight: 800; }
+    .platform-header p { font-size: 16px; color: #94a3b8; margin-top: 4px; }
+
+    .steps { display: flex; flex-direction: column; gap: 20px; }
+    .step {
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
+    }
+    .step-number {
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; font-weight: 800;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .step-content h4 { font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+    .step-content p { font-size: 17px; color: #94a3b8; line-height: 1.6; }
+    .step-content .note {
+      display: inline-block;
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 6px;
+      padding: 4px 12px;
+      font-size: 14px;
+      color: #64748b;
+      margin-top: 8px;
+      font-style: italic;
+    }
+    .step-content .tip {
+      background: rgba(245,158,11,0.1);
+      border: 1px solid rgba(245,158,11,0.3);
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-size: 15px;
+      color: #fbbf24;
+      margin-top: 10px;
+    }
+
+    /* GPT-4 colors */
+    .gpt .platform-icon { background: linear-gradient(135deg, #10b981, #059669); }
+    .gpt .step-number { background: #059669; color: #fff; }
+    .gpt .platform-header h2 { color: #34d399; }
+
+    /* Claude colors */
+    .claude .platform-icon { background: linear-gradient(135deg, #f59e0b, #d97706); }
+    .claude .step-number { background: #d97706; color: #fff; }
+    .claude .platform-header h2 { color: #fde68a; }
+
+    /* ── Bonus tips ── */
+    .tips-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 48px;
+    }
+    .tip-card {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 14px;
+      padding: 28px;
+    }
+    .tip-card .icon { font-size: 36px; margin-bottom: 14px; }
+    .tip-card h4 { font-size: 19px; font-weight: 700; margin-bottom: 8px; }
+    .tip-card p { font-size: 16px; color: #94a3b8; line-height: 1.6; }
+
+    /* ── Membership persona box ── */
+    .persona-box {
+      background: #0a1118;
+      border: 2px solid #0057a8;
+      border-radius: 16px;
+      padding: 40px;
+      margin-bottom: 48px;
+    }
+    .persona-box h3 {
+      font-size: 24px; font-weight: 800; color: #60a5fa;
+      margin-bottom: 20px;
+      display: flex; align-items: center; gap: 12px;
+    }
+    .persona-box pre {
+      font-family: monospace;
+      font-size: 15px;
+      line-height: 1.8;
+      color: #e2e8f0;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .persona-box pre .role { color: #7dd3fc; }
+    .persona-box pre .expertise { color: #86efac; }
+    .persona-box pre .audience { color: #fde68a; }
+    .persona-box pre .tone { color: #f0abfc; }
+    .persona-box pre .goal { color: #fb923c; }
+
+    /* ── Footer ── */
+    .footer {
+      background: #020817;
+      border-top: 1px solid #1e293b;
+      padding: 32px 80px;
+      text-align: center;
+    }
+    .footer p { font-size: 15px; color: #475569; }
+    .footer strong { color: #64748b; }
+
+    /* ── Divider ── */
+    .divider { border: none; border-top: 1px solid #1e293b; margin: 48px 0; }
+
+    /* ── Comparison table ── */
+    .compare-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      margin-bottom: 48px;
+      font-size: 17px;
+    }
+    .compare-table th {
+      padding: 16px 24px;
+      font-size: 15px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      border-bottom: 2px solid #334155;
+    }
+    .compare-table th:first-child { color: #94a3b8; text-align: left; }
+    .compare-table th.gpt-col { color: #34d399; background: rgba(16,185,129,0.05); text-align: center; }
+    .compare-table th.claude-col { color: #fde68a; background: rgba(245,158,11,0.05); text-align: center; }
+    .compare-table td {
+      padding: 14px 24px;
+      border-bottom: 1px solid #1e293b;
+      vertical-align: top;
+      line-height: 1.6;
+    }
+    .compare-table td:first-child { color: #94a3b8; font-size: 15px; font-weight: 600; }
+    .compare-table td.gpt-col { background: rgba(16,185,129,0.03); color: #a7f3d0; text-align: center; }
+    .compare-table td.claude-col { background: rgba(245,158,11,0.03); color: #fef3c7; text-align: center; }
+    .badge-yes { color: #34d399; font-weight: 700; }
+    .badge-no { color: #f87171; }
+    .badge-partial { color: #fbbf24; }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-inner">
+    <div class="header-badge">UFT Professional Learning &bull; Session 2 Resource</div>
+    <h1>AI Personas — Your How-To Guide</h1>
+    <p>Step-by-step instructions for building and saving personas in ChatGPT (GPT-4) and Claude — plus the ready-to-use UFT Membership Coordinator persona and a fill-in-the-blank template.</p>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- ── SECTION 1: What to Have Ready ── -->
+  <div class="section-header">
+    <h2>Before You Start: What to Have Ready</h2>
+    <div class="underline"></div>
+    <p>Before writing your persona, answer these 5 questions. Your answers become the building blocks.</p>
+  </div>
+
+  <div class="persona-template">
+    <h3>Persona Planning Worksheet</h3>
+    <div class="template-grid">
+      <div class="template-field">
+        <label>1. Role &amp; Identity</label>
+        <p>What job title or role should the AI play? What organization does it represent?</p>
+        <p class="placeholder">Example: "UFT Membership Coordinator with 10 years of experience"</p>
+      </div>
+      <div class="template-field">
+        <label>2. Knowledge Base</label>
+        <p>What does it need to know? List key topics, policies, documents, or terminology.</p>
+        <p class="placeholder">Example: "UFT benefits, dues, Taylor Law, welfare fund, COPE"</p>
+      </div>
+      <div class="template-field">
+        <label>3. Audience</label>
+        <p>Who is it talking to? What do they need? What is their background or reading level?</p>
+        <p class="placeholder">Example: "Active UFT members — teachers, paras, SRPs — asking about benefits"</p>
+      </div>
+      <div class="template-field">
+        <label>4. Tone &amp; Voice</label>
+        <p>How should it sound? Formal or conversational? What language or values should it reflect?</p>
+        <p class="placeholder">Example: "Warm, clear, empowering. Pro-worker. Plain language. Affirm union solidarity."</p>
+      </div>
+      <div class="template-field">
+        <label>5. Goals</label>
+        <p>What should it accomplish? What is the purpose of the output?</p>
+        <p class="placeholder">Example: "Help members understand and use their UFT benefits"</p>
+      </div>
+      <div class="template-field">
+        <label>6. Guardrails (optional but recommended)</label>
+        <p>What should it NOT do or say? Any topics to avoid or redirect?</p>
+        <p class="placeholder">Example: "Never speak negatively about the union. If unsure, direct to 212-331-6300."</p>
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider" />
+
+  <!-- ── SECTION 2: UFT Membership Persona (Ready to Use) ── -->
+  <div class="section-header">
+    <h2>Ready-to-Use: UFT Membership Coordinator Persona</h2>
+    <div class="underline" style="background: linear-gradient(90deg, #f59e0b, #ef4444);"></div>
+    <p>Copy the text below and paste it as your very first message when you open a new AI chat session.</p>
+  </div>
+
+  <div class="persona-box">
+    <h3>📋 UFT Membership Coordinator Persona</h3>
+    <pre>
+<span class="role">You are an expert UFT Membership Coordinator with 10+ years of experience supporting educators in New York City public schools.</span>
+
+<span class="expertise">Your expertise includes: UFT membership benefits, dues structures, the difference between in-service and retiree membership, welfare fund benefits (dental, optical, prescription, legal services), COPE (Committee on Political Education), member rights under the Taylor Law, the UFT contract, how to file a grievance, and how to contact the appropriate UFT department for member support.</span>
+
+<span class="audience">Your audience is active UFT members — primarily teachers, paraprofessionals, and school-related professionals — who may have questions ranging from basic dues questions to understanding grievance procedures. They are busy professionals who need clear, practical answers.</span>
+
+<span class="tone">Communication style: Warm, clear, and empowering. Use plain language. Avoid jargon unless you define it. Always affirm the value and importance of union membership. Write in an accessible style appropriate for a range of reading levels. Keep responses concise unless detail is requested.</span>
+
+<span class="goal">Your goal: Help members understand and maximize their UFT benefits and rights. Always support and uplift the union. Never speak negatively about the UFT or suggest that membership is not worth it. If you are unsure of a specific policy detail or it may have changed, say so transparently and recommend the member contact the UFT Member Services helpline at 212-331-6300 or visit uft.org.</span>
+    </pre>
+    <p class="copy-note">Tip: Save this in a Google Doc or Notes app so you can copy-paste it at the start of every AI session.</p>
+  </div>
+
+  <hr class="divider" />
+
+  <!-- ── SECTION 3: GPT-4 Steps ── -->
+  <div class="section-header">
+    <h2>How to Use Your Persona in ChatGPT (GPT-4)</h2>
+    <div class="underline" style="background: linear-gradient(90deg, #10b981, #059669);"></div>
+    <p>There are two ways to use personas in ChatGPT: a quick session method and a permanent "Custom Instructions" method.</p>
+  </div>
+
+  <div class="platform-block gpt">
+    <div class="platform-header">
+      <div class="platform-icon">🤖</div>
+      <div>
+        <h2>ChatGPT / GPT-4</h2>
+        <p>chat.openai.com &nbsp;|&nbsp; Requires a free or Plus account</p>
+      </div>
+    </div>
+
+    <h3 style="font-size:22px;font-weight:700;color:#34d399;margin-bottom:24px;">Method A: Quick Session Persona (works in every chat)</h3>
+    <div class="steps" style="margin-bottom:40px;">
+      <div class="step">
+        <div class="step-number" style="background:#059669;">1</div>
+        <div class="step-content">
+          <h4>Open a new chat</h4>
+          <p>Go to <strong>chat.openai.com</strong> and click <strong>"New chat"</strong> in the left sidebar. Always start a new chat for a new work session.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-number" style="background:#059669;">2</div>
+        <div class="step-content">
+          <h4>Paste your persona as your first message</h4>
+          <p>Copy your full persona text and paste it into the message box. Click send. This is your setup message — you are not asking a question yet, you are establishing who the AI is.</p>
+          <div class="tip">💬 ChatGPT will typically respond: "Understood! I'm ready to assist as your UFT Membership Coordinator..." — this confirms the persona is active.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-number" style="background:#059669;">3</div>
+        <div class="step-content">
+          <h4>Now ask your real question</h4>
+          <p>In the next message, ask what you actually need. The AI will now answer from the perspective of your established persona.</p>
+          <span class="note">Example: "Draft a welcome email for a new paraprofessional joining the UFT for the first time."</span>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-number" style="background:#059669;">4</div>
+        <div class="step-content">
+          <h4>Keep the conversation going — do not close the tab</h4>
+          <p>Your persona stays active as long as you are in the same chat thread. If you open a new chat, you will need to paste the persona again.</p>
+        </div>
+      </div>
+    </div>
+
+    <hr style="border:none;border-top:1px solid #334155;margin-bottom:32px;" />
+
+    <h3 style="font-size:22px;font-weight:700;color:#34d399;margin-bottom:24px;">Method B: Custom Instructions (saves your persona permanently)</h3>
+    <div class="steps">
+      <div class="step">
+        <div class="step-number" style="background:#059669;">1</div>
+        <div class="step-content">
+          <h4>Click your profile icon (top right)</h4>
+          <p>In ChatGPT, click your profile photo or initials in the top-right corner to open your account menu.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-number" style="background:#059669;">2</div>
+        <div class="step-content">
+          <h4>Select "Customize ChatGPT"</h4>
+          <p>From the dropdown menu, click <strong>"Customize ChatGPT"</strong> (sometimes listed under "Settings").</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-number" style="background:#059669;">3</div>
+        <div class="step-content">
+          <h4>Fill in "Custom Instructions"</h4>
+          <p>You will see two text fields:</p>
+          <p style="margin-top:8px;"><strong style="color:#34d399;">Field 1 — "What would you like ChatGPT to know about you?"</strong><br>Paste your Role, Knowledge Base, and Audience sections here.</p>
+          <p style="margin-top:12px;"><strong style="color:#34d399;">Field 2 — "How would you like ChatGPT to respond?"</strong><br>Paste your Tone, Voice, Goals, and Guardrails here.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-number" style="background:#059669;">4</div>
+        <div class="step-content">
+          <h4>Click "Save"</h4>
+          <p>Your custom instructions are now saved. Every new chat you open will automatically use this persona — no copy-pasting required.</p>
+          <div class="tip">⚠️ Note: Custom Instructions apply to ALL chats. If you want to use a different persona for a different project, use Method A (manual paste) for that session instead.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-number" style="background:#059669;">5</div>
+        <div class="step-content">
+          <h4>Create a GPT (Advanced — GPT-4 Plus users)</h4>
+          <p>If you have ChatGPT Plus, you can create a dedicated "custom GPT" with your persona baked in. Go to <strong>chat.openai.com/gpts</strong> &rarr; "Create" &rarr; paste your persona into the instructions. Name it "UFT Membership Assistant" and access it from your sidebar any time.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SECTION 4: Claude Steps ── -->
+  <div class="section-header">
+    <h2>How to Use Your Persona in Claude</h2>
+    <div class="underline" style="background: linear-gradient(90deg, #f59e0b, #d97706);"></div>
+    <p>Claude (by Anthropic) handles personas slightly differently — here is how to set one up effectively.</p>
+  </div>
+
+  <div class="platform-block claude">
+    <div class="platform-header">
+      <div class="platform-icon">✨</div>
+      <div>
+        <h2>Claude (Anthropic)</h2>
+        <p>claude.ai &nbsp;|&nbsp; Free tier available &bull; Claude 3.5 Sonnet recommended</p>
+      </div>
+    </div>
+
+    <h3 style="font-size:22px;font-weight:700;color:#fde68a;margin-bottom:24px;">Method A: Quick Session Persona (works in every chat)</h3>
+    <div class="steps" style="margin-bottom:40px;">
+      <div class="step">
+        <div class="step-number" style="background:#d97706;">1</div>
+        <div class="step-content">
+          <h4>Go to claude.ai and start a new conversation</h4>
+          <p>Click <strong>"New conversation"</strong> in the left sidebar. Like ChatGPT, each conversation is independent.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-number" style="background:#d97706;">2</div>
+        <div class="step-content">
+          <h4>Paste your persona as your first message</h4>
+          <p>Copy your full persona text and paste it as your opening message. Claude responds particularly well to structured, detailed personas and will confirm it understands the role.</p>
+          <div class="tip" style="border-color:rgba(245,158,11,0.3);background:rgba(245,158,11,0.1);">✨ Claude tip: Claude tends to be more conversational and nuanced in its persona adoption. You may want to add: "Please confirm you understand this role before I ask my first question."</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-number" style="background:#d97706;">3</div>
+        <div class="step-content">
+          <h4>Ask your question</h4>
+          <p>Now ask what you need. Claude will respond in the context of your persona. Claude is excellent at maintaining a consistent voice across a long conversation.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-number" style="background:#d97706;">4</div>
+        <div class="step-content">
+          <h4>Use the same conversation for related tasks</h4>
+          <p>Claude is especially strong at remembering context within a conversation. If you are working on multiple related outputs (e.g., a welcome letter, a FAQ sheet, a renewal notice), do them all in one chat.</p>
+        </div>
+      </div>
+    </div>
+
+    <hr style="border:none;border-top:1px solid #334155;margin-bottom:32px;" />
+
+    <h3 style="font-size:22px;font-weight:700;color:#fde68a;margin-bottom:24px;">Method B: Claude Projects (saves persona &amp; context permanently)</h3>
+    <div class="steps">
+      <div class="step">
+        <div class="step-number" style="background:#d97706;">1</div>
+        <div class="step-content">
+          <h4>Click "Projects" in the left sidebar</h4>
+          <p>Claude Projects is available on the free plan. Click <strong>"Projects"</strong> in the left sidebar of claude.ai.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-number" style="background:#d97706;">2</div>
+        <div class="step-content">
+          <h4>Click "Create project"</h4>
+          <p>Name it something clear, like <strong>"UFT Membership Work"</strong> or <strong>"UFT Communications"</strong>.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-number" style="background:#d97706;">3</div>
+        <div class="step-content">
+          <h4>Add your persona to "Project Instructions"</h4>
+          <p>Inside the project, click <strong>"Edit project instructions"</strong> (the gear/settings icon). Paste your full persona text here. Click Save.</p>
+          <div class="tip" style="border-color:rgba(245,158,11,0.3);background:rgba(245,158,11,0.1);">🗂️ You can also upload documents to your project — for example, upload the UFT contract summary or benefit guides so Claude can reference them when answering questions.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-number" style="background:#d97706;">4</div>
+        <div class="step-content">
+          <h4>Start a new conversation inside the project</h4>
+          <p>Click <strong>"New chat"</strong> within your project. Every conversation inside this project automatically loads your persona — you never have to paste it again.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-number" style="background:#d97706;">5</div>
+        <div class="step-content">
+          <h4>Create multiple projects for different roles</h4>
+          <p>You can create separate Claude Projects for different work areas — "UFT Membership", "UFT Communications", "Grievance Support" — each with their own persona and uploaded documents.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider" />
+
+  <!-- ── SECTION 5: Side-by-Side Comparison ── -->
+  <div class="section-header">
+    <h2>GPT-4 vs. Claude — Persona Feature Comparison</h2>
+    <div class="underline"></div>
+    <p>At a glance, here is how each platform handles personas:</p>
+  </div>
+
+  <table class="compare-table" style="margin-bottom:48px;">
+    <thead>
+      <tr>
+        <th>Feature</th>
+        <th class="gpt-col">ChatGPT / GPT-4</th>
+        <th class="claude-col">Claude</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Paste persona at start of chat</td>
+        <td class="gpt-col"><span class="badge-yes">✓ Yes</span></td>
+        <td class="claude-col"><span class="badge-yes">✓ Yes</span></td>
+      </tr>
+      <tr>
+        <td>Saved persona (no re-pasting)</td>
+        <td class="gpt-col"><span class="badge-yes">✓ Custom Instructions</span></td>
+        <td class="claude-col"><span class="badge-yes">✓ Projects</span></td>
+      </tr>
+      <tr>
+        <td>Upload documents alongside persona</td>
+        <td class="gpt-col"><span class="badge-partial">Partial (per chat)</span></td>
+        <td class="claude-col"><span class="badge-yes">✓ Project Knowledge</span></td>
+      </tr>
+      <tr>
+        <td>Multiple saved personas</td>
+        <td class="gpt-col"><span class="badge-yes">✓ Custom GPTs (Plus)</span></td>
+        <td class="claude-col"><span class="badge-yes">✓ Multiple Projects</span></td>
+      </tr>
+      <tr>
+        <td>Memory of past sessions</td>
+        <td class="gpt-col"><span class="badge-partial">✓ With Memory feature on</span></td>
+        <td class="claude-col"><span class="badge-partial">Within project chats</span></td>
+      </tr>
+      <tr>
+        <td>Free tier available</td>
+        <td class="gpt-col"><span class="badge-yes">✓ Free tier (GPT-3.5)</span></td>
+        <td class="claude-col"><span class="badge-yes">✓ Free tier (Claude 3)</span></td>
+      </tr>
+      <tr>
+        <td>Best for</td>
+        <td class="gpt-col">Tasks, drafts, structured output</td>
+        <td class="claude-col">Long documents, nuanced writing</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <hr class="divider" />
+
+  <!-- ── SECTION 6: Pro Tips ── -->
+  <div class="section-header">
+    <h2>Pro Tips for Better Personas</h2>
+    <div class="underline" style="background: linear-gradient(90deg, #8b5cf6, #a855f7);"></div>
+  </div>
+
+  <div class="tips-grid">
+    <div class="tip-card">
+      <div class="icon">🔄</div>
+      <h4>Iterate Your Persona</h4>
+      <p>Your first persona will not be perfect — and that is fine. After a few sessions, add what is missing. "Also, always include a call-to-action at the end of member communications."</p>
+    </div>
+    <div class="tip-card">
+      <div class="icon">📁</div>
+      <h4>Keep a Persona Library</h4>
+      <p>Save all your personas in a shared Google Doc. Label each one clearly. Share with your team so everyone uses consistent, on-brand personas across your department.</p>
+    </div>
+    <div class="tip-card">
+      <div class="icon">🧪</div>
+      <h4>Test with a Known Task</h4>
+      <p>After setting a persona, test it with a task you already know well. If the answer feels "off", refine your persona. The test-and-refine loop is how you get to a great persona fast.</p>
+    </div>
+    <div class="tip-card">
+      <div class="icon">✂️</div>
+      <h4>Keep It Focused</h4>
+      <p>Longer is not always better. A focused persona of 150–300 words outperforms a vague 600-word one. Be specific about role, audience, tone, and guardrails — skip everything else.</p>
+    </div>
+    <div class="tip-card">
+      <div class="icon">🚫</div>
+      <h4>Set Clear Guardrails</h4>
+      <p>Always tell the AI what NOT to do. "If you are unsure, say so and recommend the member call 212-331-6300" prevents hallucinated policy details — crucial for union work.</p>
+    </div>
+    <div class="tip-card">
+      <div class="icon">🤝</div>
+      <h4>Share What Works</h4>
+      <p>If you build a persona that produces great results, share it with your colleagues. A team that uses shared, consistent personas will produce far more consistent output than one that improvises each time.</p>
+    </div>
+  </div>
+
+  <!-- ── SECTION 7: Fill-in Template ── -->
+  <div class="section-header">
+    <h2>Your Fill-in-the-Blank Persona Template</h2>
+    <div class="underline" style="background: linear-gradient(90deg, #06b6d4, #0284c7);"></div>
+    <p>Copy the template below, fill in the brackets, and you have a working persona ready to paste into any AI.</p>
+  </div>
+
+  <div class="persona-box" style="border-color:#06b6d4;">
+    <h3 style="color:#67e8f9;">📝 Universal UFT Persona Template</h3>
+    <pre style="color:#e2e8f0;">
+You are an expert [JOB TITLE / ROLE] at the United Federation of Teachers with [X] years of experience supporting [WHO YOU SUPPORT].
+
+Your expertise includes: [LIST 4-6 KEY TOPICS, POLICIES, OR SYSTEMS YOU WORK WITH].
+
+Your audience is [DESCRIBE WHO WILL READ THE OUTPUT — their role, what they need, their experience level].
+
+Communication style: [DESCRIBE TONE — e.g., warm and supportive / professional and concise / plain language for general audiences]. Always [SOMETHING THAT REFLECTS UFT VALUES — e.g., "affirm the value of union membership" / "center the needs of educators" / "use a pro-worker frame"].
+
+Your goal: [WHAT SHOULD THE OUTPUT ACHIEVE?]. If you are unsure of a specific detail, say so transparently and direct the person to [APPROPRIATE UFT RESOURCE OR CONTACT].
+    </pre>
+  </div>
+
+</div><!-- /main -->
+
+<!-- FOOTER -->
+<div class="footer">
+  <p><strong>UFT Professional Learning &bull; AI for UFT Staff Series</strong></p>
+  <p style="margin-top:8px;">Questions? Contact your UFT Professional Learning coordinator &bull; uft.org</p>
+</div>
+
+</body>
+</html>
