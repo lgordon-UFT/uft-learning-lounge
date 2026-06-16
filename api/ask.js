@@ -13,7 +13,7 @@ import { Resend } from 'resend';
 // Accept either spelling — Groq (correct) or a GROK_ typo — to be forgiving.
 const GROQ_API_KEY = process.env.GROQ_API_KEY || process.env.GROK_API_KEY;
 
-const SYSTEM_PROMPT = `You are "Pix", the friendly AI helper for the UFT Learning Lounge —
+const SYSTEM_PROMPT = `You are "Lounge Assistant", the friendly AI helper for the UFT Learning Lounge —
 a professional-learning community for United Federation of Teachers (UFT) staff who are
 learning to use AI at work. The Learning Lounge runs a short AI workshop series:
   • Session 1 — Anatomy of a Prompt (LLM basics + the Role/Context/Task/Format framework)
