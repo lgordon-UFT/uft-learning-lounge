@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Anatomy of a Prompt — Facilitator Guide</title>
+  <link href="https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@500,700,800,900&f[]=satoshi@400,500,700&display=swap" rel="stylesheet"/>
+  <style>
+    :root{
+      --bg:#f5f2ee; --surface:#faf9f7; --surface2:#ffffff; --offset:#ede9e3;
+      --border:#d0cdc6; --divider:#dddbd5;
+      --text:#22201c; --muted:#7a776c; --faint:#b5b2aa;
+      --uft:#002855; --uft-mid:#0057a8;
+      --gold:#b8920e; --gold-hover:#8f710a; --gold-light:#fdf3d0; --gold-mid:#f0d060;
+      --sky:#1e8ab8; --sky-hover:#16699a; --sky-light:#d0ecf8;
+      --green:#3d7a1e; --green-light:#d4edca;
+      --font-display:'Cabinet Grotesk','Helvetica Neue',sans-serif;
+      --font-body:'Satoshi','Inter',sans-serif;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{
+      font-family:var(--font-body);background:var(--bg);color:var(--text);
+      line-height:1.65;padding:40px 28px;-webkit-font-smoothing:antialiased;
+    }
+    h1,h2,h3,h4{font-family:var(--font-display);line-height:1.12;}
+    .doc{max-width:940px;margin:0 auto;display:flex;flex-direction:column;gap:24px;}
+
+    .topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;}
+    .back-link{
+      display:inline-flex;align-items:center;gap:8px;font-size:14px;font-weight:700;
+      color:var(--uft);text-decoration:none;padding:8px 16px;border-radius:9999px;
+      background:var(--surface2);border:1px solid var(--border);transition:border-color .2s,color .2s;
+    }
+    .back-link:hover{border-color:var(--gold);color:var(--gold-hover);}
+    .print-btn{
+      display:inline-flex;align-items:center;gap:8px;font-size:14px;font-weight:700;
+      color:var(--uft);text-decoration:none;cursor:pointer;padding:8px 16px;
+      border-radius:9999px;background:var(--gold-mid);border:none;
+    }
+    .print-btn:hover{background:var(--gold);}
+
+    .doc-header{
+      background:linear-gradient(135deg,var(--uft),var(--uft-mid));
+      color:#fff;border-radius:20px;padding:34px 40px;position:relative;overflow:hidden;
+    }
+    .doc-header::after{
+      content:'';position:absolute;top:-80px;right:-80px;width:340px;height:340px;
+      background:radial-gradient(ellipse,rgba(240,208,96,0.20) 0%,transparent 70%);
+    }
+    .brand-row{display:flex;align-items:center;gap:12px;margin-bottom:18px;position:relative;flex-wrap:wrap;}
+    .brand-mark{
+      width:40px;height:40px;border-radius:11px;background:var(--gold-mid);
+      display:flex;align-items:center;justify-content:center;flex-shrink:0;
+      font-family:var(--font-display);font-weight:900;font-size:20px;color:var(--uft);
+    }
+    .brand-name{font-family:var(--font-display);font-weight:800;font-size:16px;color:#fff;line-height:1.15;}
+    .brand-name span{display:block;font-size:12px;font-weight:500;color:rgba(255,255,255,0.65);}
+    .session-tag{
+      margin-left:auto;display:inline-flex;align-items:center;gap:7px;
+      background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.28);
+      border-radius:9999px;padding:5px 15px;font-size:12px;font-weight:700;
+      letter-spacing:.06em;text-transform:uppercase;color:var(--gold-mid);
+    }
+    .doc-badge{
+      display:inline-block;background:rgba(255,255,255,0.14);border:1px solid rgba(255,255,255,0.3);
+      border-radius:7px;padding:4px 14px;font-size:11px;letter-spacing:.2em;text-transform:uppercase;
+      color:var(--gold-mid);margin-bottom:14px;position:relative;font-weight:700;
+    }
+    .doc-header h1{position:relative;font-size:38px;font-weight:900;margin-bottom:8px;letter-spacing:-0.01em;}
+    .doc-header .lede{position:relative;font-size:17px;color:rgba(255,255,255,0.78);max-width:64ch;line-height:1.6;}
+
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:18px;overflow:hidden;}
+    .card-head{padding:20px 30px 16px;border-bottom:1px solid var(--divider);background:var(--surface2);}
+    .card-head h2{font-size:22px;font-weight:800;color:var(--uft);display:flex;align-items:center;gap:10px;}
+    .card-head p{font-size:14px;color:var(--muted);margin-top:3px;}
+    .card-body{padding:24px 30px;}
+
+    /* ── at a glance ── */
+    .glance-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px;}
+    .glance{border-radius:13px;padding:16px;text-align:center;border:1px solid var(--border);}
+    .glance .big{font-family:var(--font-display);font-size:26px;font-weight:900;}
+    .glance .lbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-top:4px;font-weight:700;}
+    .g-sky{background:var(--sky-light);} .g-sky .big{color:var(--sky-hover);}
+    .g-gold{background:var(--gold-light);} .g-gold .big{color:var(--gold-hover);}
+    .g-green{background:var(--green-light);} .g-green .big{color:var(--green);}
+    .g-uft{background:#dbe6f3;} .g-uft .big{color:var(--uft-mid);}
+
+    .alert{border-radius:11px;padding:14px 18px;font-size:14px;line-height:1.6;margin:12px 0;display:flex;gap:11px;align-items:flex-start;}
+    .alert .ic{font-size:18px;flex-shrink:0;margin-top:1px;}
+    .alert-info{background:var(--sky-light);border:1px solid #aedcf0;color:#15506b;}
+    .alert-tip{background:var(--green-light);border:1px solid #a9d493;color:#2a5e15;}
+    .alert-warn{background:var(--gold-light);border:1px solid #ecd98a;color:#6b5407;}
+    .alert b{font-weight:700;}
+
+    /* ── checklist ── */
+    .checklist{list-style:none;display:flex;flex-direction:column;gap:10px;}
+    .checklist li{display:flex;align-items:flex-start;gap:11px;font-size:14.5px;color:var(--text);line-height:1.5;}
+    .checklist li::before{content:'☐';font-size:18px;color:var(--gold);flex-shrink:0;line-height:1.3;}
+
+    /* ── run of show ── */
+    .ros{width:100%;border-collapse:separate;border-spacing:0;}
+    .ros th{
+      padding:11px 16px;font-family:var(--font-display);font-size:11px;font-weight:800;
+      text-transform:uppercase;letter-spacing:.1em;color:var(--uft);
+      background:var(--offset);border-bottom:2px solid var(--border);text-align:left;
+    }
+    .ros td{padding:13px 16px;font-size:14px;border-bottom:1px solid var(--divider);vertical-align:top;line-height:1.55;}
+    .ros tr:last-child td{border-bottom:none;}
+    .time-badge{display:inline-block;padding:3px 11px;border-radius:9999px;font-size:12.5px;font-weight:700;white-space:nowrap;background:#dbe6f3;color:var(--uft-mid);}
+    .phase{font-family:var(--font-display);font-weight:700;font-size:14px;color:var(--uft);}
+    .td-watch{color:var(--gold-hover);font-size:13px;}
+    .ros tr.hl td{background:var(--gold-light);}
+
+    /* ── scripts ── */
+    .script-lbl{font-size:14px;font-weight:700;color:var(--uft);margin:18px 0 7px;}
+    .script-lbl:first-child{margin-top:0;}
+    .script{
+      background:var(--sky-light);border-left:4px solid var(--sky);border-radius:0 10px 10px 0;
+      padding:14px 18px;font-size:14.5px;color:#15506b;font-style:italic;line-height:1.7;
+    }
+    .script strong{display:block;font-size:10.5px;text-transform:uppercase;letter-spacing:.12em;color:var(--sky-hover);font-style:normal;margin-bottom:6px;}
+
+    /* ── framework reference ── */
+    .fw-strip{display:flex;align-items:stretch;border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:14px;}
+    .fw-strip:last-child{margin-bottom:0;}
+    .fw-letter{width:56px;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:26px;font-weight:900;color:#fff;flex-shrink:0;}
+    .fw-txt{padding:13px 18px;background:var(--surface2);flex:1;}
+    .fw-txt h3{font-size:15px;font-weight:800;color:var(--uft);margin-bottom:3px;}
+    .fw-txt p{font-size:13.5px;color:var(--text);line-height:1.55;}
+    .fw-txt .say{color:var(--sky-hover);font-style:italic;font-size:13px;margin-top:5px;}
+    .fwr .fw-letter{background:var(--gold-hover);}
+    .fwc .fw-letter{background:var(--sky-hover);}
+    .fwt .fw-letter{background:var(--uft);}
+    .fwf .fw-letter{background:var(--green);}
+
+    /* ── discussion ── */
+    .disc{background:var(--surface2);border:1px solid var(--border);border-radius:11px;padding:15px 18px;margin-bottom:11px;}
+    .disc .q{font-size:15px;font-weight:700;color:var(--uft);margin-bottom:5px;}
+    .disc .follow{font-size:13.5px;color:var(--muted);}
+
+    /* ── troubleshoot ── */
+    .trouble{display:flex;gap:16px;margin-bottom:13px;align-items:stretch;}
+    .t-prob{flex:1;background:#fdf1ee;border:1px solid #f0c9bd;border-radius:9px;padding:12px 15px;font-size:13.5px;color:#a23b1c;line-height:1.5;}
+    .t-fix{flex:1.6;background:var(--green-light);border:1px solid #a9d493;border-radius:9px;padding:12px 15px;font-size:13.5px;color:#2a5e15;line-height:1.5;}
+
+    /* ── Q&A ── */
+    .qa{border-bottom:1px solid var(--divider);padding:13px 0;}
+    .qa:last-child{border-bottom:none;}
+    .qa .q{font-size:14.5px;font-weight:700;color:var(--text);margin-bottom:4px;}
+    .qa .a{font-size:14px;color:var(--muted);line-height:1.6;}
+
+    .doc-footer{background:var(--uft);color:rgba(255,255,255,0.65);border-radius:16px;padding:20px 30px;font-size:13px;text-align:center;}
+    .doc-footer strong{color:#fff;}
+
+    @media (max-width:760px){
+      .glance-grid{grid-template-columns:1fr 1fr;}
+      .trouble{flex-direction:column;}
+      .doc-header h1{font-size:29px;}
+    }
+    @media print{
+      body{padding:0;background:#fff;}
+      .doc{gap:16px;max-width:100%;}
+      .no-print{display:none!important;}
+      .card{box-shadow:none!important;border-color:#cfcbc3;break-inside:avoid;}
+      .doc-header,.doc-footer,.fw-letter,.glance,.alert,.script,.time-badge,.t-prob,.t-fix,.disc{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+      .ros tr.hl td{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+    }
+  </style>
+</head>
+<body>
+<div class="doc">
+
+  <div class="topbar no-print">
+    <a class="back-link" href="../../sessions.html">← Back to Sessions</a>
+    <button class="print-btn" onclick="window.print()">⎙ Print this guide</button>
+  </div>
+
+  <header class="doc-header">
+    <div class="brand-row">
+      <div class="brand-mark">U</div>
+      <div class="brand-name">UFT Learning Lounge<span>Professional Learning</span></div>
+      <div class="session-tag">Session 1 · Anatomy of a Prompt</div>
+    </div>
+    <span class="doc-badge">For Facilitators Only</span>
+    <h1>Facilitator Guide &amp; Run-of-Show</h1>
+    <p class="lede">A complete 60-minute plan for leading Session 1: timing, talking-point scripts, discussion prompts, and troubleshooting. By the end, participants can write a 4-part prompt and know which AI tool to start with.</p>
+  </header>
+
+  <!-- At a glance -->
+  <section class="card">
+    <div class="card-head"><h2>📋 At a Glance</h2><p>Everything you need before you walk in.</p></div>
+    <div class="card-body">
+      <div class="glance-grid">
+        <div class="glance g-sky"><div class="big">60</div><div class="lbl">Minutes Total</div></div>
+        <div class="glance g-gold"><div class="big">4</div><div class="lbl">Framework Parts</div></div>
+        <div class="glance g-green"><div class="big">3</div><div class="lbl">AI Tools Compared</div></div>
+        <div class="glance g-uft"><div class="big">1</div><div class="lbl">Hands-on Practice</div></div>
+      </div>
+      <div class="alert alert-info">
+        <span class="ic">ℹ️</span>
+        <div><b>Session goal:</b> Participants leave able to (1) explain in one sentence what an LLM is, (2) write a prompt using Role + Context + Task + Format, and (3) name which of ChatGPT, Claude, or Gemini they'd reach for first. Keep it practical — every example should connect to real UFT work.</div>
+      </div>
+      <div class="alert alert-warn">
+        <span class="ic">⚠️</span>
+        <div><b>Two resource pages to share:</b> the <b>Participant Guide</b> (4-part framework reference card) and the <b>Tool Comparison</b> page. Have both links ready to paste into chat, or print the Participant Guide in advance.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Setup checklist -->
+  <section class="card">
+    <div class="card-head"><h2>✅ Before You Start — Setup Checklist</h2></div>
+    <div class="card-body">
+      <ul class="checklist">
+        <li>Slide deck is open on screen (start at the title slide).</li>
+        <li>Participant Guide link is ready to paste into chat — or printed copies are on the tables.</li>
+        <li>Tool Comparison page link is ready for the comparison segment.</li>
+        <li>You have at least one AI tool (ChatGPT, Claude, or Gemini) open and logged in for the live demo — test it works first.</li>
+        <li>A backup demo prompt is saved in case live generation is slow or fails.</li>
+        <li>Timer or phone ready for the hands-on practice block.</li>
+        <li>You can confirm participants have access to at least one AI tool for the practice (or are paired with someone who does).</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- Run of show -->
+  <section class="card">
+    <div class="card-head"><h2>⏱️ Run of Show — Minute by Minute</h2><p>60 minutes, seven phases. Adjust the practice block if you're running long.</p></div>
+    <div class="card-body">
+      <table class="ros">
+        <thead>
+          <tr>
+            <th style="width:95px;">Time</th>
+            <th style="width:150px;">Phase</th>
+            <th>Facilitator Action</th>
+            <th style="width:170px;">Watch For</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="time-badge">0:00–5:00</span></td>
+            <td><span class="phase">Welcome &amp; Intro</span></td>
+            <td>Title slide. Welcome the group. Ask: "Who has used ChatGPT or another AI?" by show of hands. State the goal of the hour in one sentence.</td>
+            <td class="td-watch">Set a no-judgment tone — many will be brand new.</td>
+          </tr>
+          <tr>
+            <td><span class="time-badge">5:00–13:00</span></td>
+            <td><span class="phase">LLM Explainer</span></td>
+            <td>Explain what an LLM is in plain language (see script). Use the "very well-read autocomplete" analogy. Cover what it's great at vs. where it makes things up.</td>
+            <td class="td-watch">Don't go technical. Keep it to the one analogy.</td>
+          </tr>
+          <tr class="hl">
+            <td><span class="time-badge">13:00–25:00</span></td>
+            <td><span class="phase">4-Part Framework</span></td>
+            <td>Walk through Role + Context + Task + Format one at a time (see reference below). Share the Participant Guide. Build one example prompt live with the group, adding a part at a time.</td>
+            <td class="td-watch">Pause after each part. Ask the room to suggest the next piece.</td>
+          </tr>
+          <tr>
+            <td><span class="time-badge">25:00–33:00</span></td>
+            <td><span class="phase">Live Demo</span></td>
+            <td>Paste the weak prompt into the AI, show the generic result. Then paste the full 4-part version. Compare side by side, out loud.</td>
+            <td class="td-watch">Narrate the difference. "Notice it now sounds like us."</td>
+          </tr>
+          <tr class="hl">
+            <td><span class="time-badge">33:00–46:00</span></td>
+            <td><span class="phase">Hands-on Practice</span></td>
+            <td>Participants pick one real task and write a 4-part prompt using the skeleton on the Guide, then run it. Circulate and help. Give a 2-minute warning.</td>
+            <td class="td-watch">People who skip Format — the most common miss.</td>
+          </tr>
+          <tr>
+            <td><span class="time-badge">46:00–54:00</span></td>
+            <td><span class="phase">Tool Comparison</span></td>
+            <td>Share the Tool Comparison page. Walk the table. Explain "start with what your office has." Invite anyone to try the same prompt in a second tool.</td>
+            <td class="td-watch">Keep claims fair — no tool is "the best."</td>
+          </tr>
+          <tr>
+            <td><span class="time-badge">54:00–60:00</span></td>
+            <td><span class="phase">Wrap-up</span></td>
+            <td>Recap the four parts. Run one or two discussion questions. Point to the next session. Remind them to keep the Participant Guide handy.</td>
+            <td class="td-watch">End on a confidence note — the skill, not the tool, is the win.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Framework reference -->
+  <section class="card">
+    <div class="card-head"><h2>🧩 4-Part Framework — Walkthrough Reference</h2><p>What to teach for each part, and a line you can say.</p></div>
+    <div class="card-body">
+      <div class="fw-strip fwr">
+        <div class="fw-letter">R</div>
+        <div class="fw-txt">
+          <h3>Role — who the AI should be</h3>
+          <p>Giving the AI an expert identity sets its vocabulary and depth.</p>
+          <p class="say">Say: "Tell it who to be. 'You are a veteran UFT chapter leader' gives you a very different answer than no role at all."</p>
+        </div>
+      </div>
+      <div class="fw-strip fwc">
+        <div class="fw-letter">C</div>
+        <div class="fw-txt">
+          <h3>Context — what it needs to know</h3>
+          <p>The audience, the purpose, and any facts, tone, or rules that matter.</p>
+          <p class="say">Say: "Who's this for? Why do you need it? What must it know? The more real detail, the more useful the answer."</p>
+        </div>
+      </div>
+      <div class="fw-strip fwt">
+        <div class="fw-letter">T</div>
+        <div class="fw-txt">
+          <h3>Task — what exactly to do</h3>
+          <p>One clear action with a strong verb: draft, summarize, compare, rewrite.</p>
+          <p class="say">Say: "Be specific about the one thing you want. If you need two things, do two prompts."</p>
+        </div>
+      </div>
+      <div class="fw-strip fwf">
+        <div class="fw-letter">F</div>
+        <div class="fw-txt">
+          <h3>Format — what it should look like</h3>
+          <p>Length, structure, and style: email, bullets, table, FAQ, numbered steps.</p>
+          <p class="say">Say: "This is the step people forget. Tell it the shape you want and you'll do almost no reformatting."</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Scripts -->
+  <section class="card">
+    <div class="card-head"><h2>🎙️ Talking-Point Scripts</h2><p>Word-for-word language for the key moments.</p></div>
+    <div class="card-body">
+      <div class="script-lbl">Opening (0:00)</div>
+      <div class="script"><strong>Say this</strong>
+        "Welcome. In the next hour you're going to learn one genuinely useful skill: how to talk to AI so it actually helps you. We'll demystify what these tools are, learn a simple four-part recipe for writing good prompts, watch it work live, and then you'll try it on something from your own job. No experience needed — by the end you'll have written a prompt you can use this week."
+      </div>
+
+      <div class="script-lbl">LLM explainer (5:00)</div>
+      <div class="script"><strong>Say this</strong>
+        "Tools like ChatGPT are 'large language models.' The simplest way to picture one: it's an extremely well-read autocomplete. It has read an enormous amount of text and learned to predict what words should come next. That's why it's brilliant at drafting, rewriting, and summarizing — and also why it can sometimes state something wrong very confidently. So it's a fantastic first-draft partner, but you're still the editor. You bring the judgment; it brings the speed."
+      </div>
+
+      <div class="script-lbl">Framework intro (13:00)</div>
+      <div class="script"><strong>Say this</strong>
+        "Here's the recipe. Four parts: Role, Context, Task, Format. Role — who the AI should be. Context — what it needs to know. Task — what exactly you want it to do. Format — what the answer should look like. Miss one and the AI guesses. Include all four and it stops guessing. Let's build one together right now."
+      </div>
+
+      <div class="script-lbl">Live demo (25:00)</div>
+      <div class="script"><strong>Say this</strong>
+        "Watch this. First I'll give it the lazy version — 'write an email about member benefits.' See how generic that is? Could be any organization. Now the same request with all four parts... look at the difference. Same AI, same minute. The only thing that changed was the prompt. That's the entire skill."
+      </div>
+
+      <div class="script-lbl">Launching practice (33:00)</div>
+      <div class="script"><strong>Say this</strong>
+        "Your turn. Pick ONE real thing from your job — an email, a summary, an explanation. Use the skeleton on your Participant Guide: fill in Role, Context, Task, Format. Write it, run it, and see what comes back. You have about ten minutes. I'll come around — wave me over if you get stuck."
+      </div>
+
+      <div class="script-lbl">Wrap-up (54:00)</div>
+      <div class="script"><strong>Say this</strong>
+        "Four parts: Role, Context, Task, Format. That's it. The difference between a frustrating AI experience and a genuinely useful one is almost always the prompt, not the tool. Keep your Participant Guide handy, start with whatever AI your office already has, and remember — you're the editor, never paste anything confidential. Nice work today."
+      </div>
+    </div>
+  </section>
+
+  <!-- Discussion -->
+  <section class="card">
+    <div class="card-head"><h2>💬 Discussion Prompts</h2><p>Use one or two in the wrap-up, based on the room's energy.</p></div>
+    <div class="card-body">
+      <div class="disc">
+        <div class="q">1. Which of the four parts do you think you'll most often forget — and why?</div>
+        <div class="follow">Follow-up: Format is the usual answer. What's a quick way to remember it?</div>
+      </div>
+      <div class="disc">
+        <div class="q">2. Think of a task you do every week. Is it a good fit for AI, or not? How do you decide?</div>
+        <div class="follow">Follow-up: Good fits are drafting, summarizing, reformatting. Poor fits involve confidential data or final judgment calls.</div>
+      </div>
+      <div class="disc">
+        <div class="q">3. The AI sounded confident but got a fact wrong. What's your move?</div>
+        <div class="follow">Follow-up: You're the editor — verify facts, never publish a first draft unchecked.</div>
+      </div>
+      <div class="disc">
+        <div class="q">4. Based on the comparison, which tool would you reach for first, and for what kind of task?</div>
+        <div class="follow">Follow-up: There's no wrong answer — start with what's available and learn it well.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Troubleshooting -->
+  <section class="card">
+    <div class="card-head"><h2>🛠️ Troubleshooting — Common Problems</h2></div>
+    <div class="card-body">
+      <div class="trouble">
+        <div class="t-prob">❌ "I can't think of a task to practice with."</div>
+        <div class="t-fix">✅ Ask: "What's one email or explanation you had to write in the last two weeks?" If still stuck, offer: "Draft a welcome email for a new member."</div>
+      </div>
+      <div class="trouble">
+        <div class="t-prob">❌ Participant writes a one-line prompt and gets a generic answer.</div>
+        <div class="t-fix">✅ Point at the skeleton: "You've got the Task — now add Role, Context, and Format. Add one and run it again." Show the improvement live.</div>
+      </div>
+      <div class="trouble">
+        <div class="t-prob">❌ The AI made up a fact or sounded too confident.</div>
+        <div class="t-fix">✅ Great teachable moment. "This is why you're the editor. AI drafts; you verify. Never send a first draft unchecked."</div>
+      </div>
+      <div class="trouble">
+        <div class="t-prob">❌ "Which tool should I use? Just tell me the best one."</div>
+        <div class="t-fix">✅ "Honestly, start with what your office already has. The prompting skill transfers to all three — that's what matters."</div>
+      </div>
+      <div class="trouble">
+        <div class="t-prob">❌ Someone doesn't have access to an AI tool.</div>
+        <div class="t-fix">✅ Pair them with a neighbor for the practice, or have them write the prompt on the Participant Guide and run it later.</div>
+      </div>
+      <div class="trouble">
+        <div class="t-prob">❌ The live demo is slow or the tool errors out.</div>
+        <div class="t-fix">✅ Switch to your saved backup output and narrate it. Don't let a loading spinner stall the room.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Common questions -->
+  <section class="card">
+    <div class="card-head"><h2>❓ Common Questions</h2><p>Quick, honest answers you can give on the spot.</p></div>
+    <div class="card-body">
+      <div class="qa">
+        <div class="q">"Is it safe to put work information into AI?"</div>
+        <div class="a">Treat anything you type as potentially stored. Never enter confidential member data — IDs, home addresses, anything private. General, non-sensitive drafting is fine.</div>
+      </div>
+      <div class="qa">
+        <div class="q">"Will AI replace my job?"</div>
+        <div class="a">It's a tool that speeds up drafting and busywork, not a replacement for judgment, relationships, or union expertise. Think of it as a very fast assistant you supervise.</div>
+      </div>
+      <div class="qa">
+        <div class="q">"Do I need the paid version?"</div>
+        <div class="a">No. The free tiers are plenty for learning the framework and everyday drafting. Paid plans mainly add higher limits and the newest models.</div>
+      </div>
+      <div class="qa">
+        <div class="q">"Why did it give me a different answer than my neighbor for the same prompt?"</div>
+        <div class="a">These tools are designed to vary their responses. That's normal — run it again or refine your prompt if you want something closer to a specific result.</div>
+      </div>
+      <div class="qa">
+        <div class="q">"What if I don't like the answer?"</div>
+        <div class="a">Just reply in the chat — "make it shorter," "warmer tone," "add a call to action." It's a conversation, not a one-shot.</div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="doc-footer">
+    <strong>UFT Learning Lounge &bull; Anatomy of a Prompt — Facilitator Guide</strong><br>
+    <span style="display:block;margin-top:5px;">Session 1 of the AI for UFT Staff series &bull; Session length: 60 minutes</span>
+  </footer>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,69 @@
+{
+  "presentation_name": "uft-anatomy-of-a-prompt",
+  "title": "Anatomy of a Prompt: How to Talk to AI",
+  "description": "",
+  "slides": {
+    "1": {
+      "title": "Title Slide",
+      "filename": "slide_01.html",
+      "file_path": "presentations/uft-anatomy-of-a-prompt/slide_01.html",
+      "created_at": "2026-06-16T00:00:00.000Z"
+    },
+    "2": {
+      "title": "What Is an LLM?",
+      "filename": "slide_02.html",
+      "file_path": "presentations/uft-anatomy-of-a-prompt/slide_02.html",
+      "created_at": "2026-06-16T00:00:00.000Z"
+    },
+    "3": {
+      "title": "Why Your Prompt Matters",
+      "filename": "slide_03.html",
+      "file_path": "presentations/uft-anatomy-of-a-prompt/slide_03.html",
+      "created_at": "2026-06-16T00:00:00.000Z"
+    },
+    "4": {
+      "title": "The 4-Part Prompt Framework",
+      "filename": "slide_04.html",
+      "file_path": "presentations/uft-anatomy-of-a-prompt/slide_04.html",
+      "created_at": "2026-06-16T00:00:00.000Z"
+    },
+    "5": {
+      "title": "Part 1 — Role",
+      "filename": "slide_05.html",
+      "file_path": "presentations/uft-anatomy-of-a-prompt/slide_05.html",
+      "created_at": "2026-06-16T00:00:00.000Z"
+    },
+    "6": {
+      "title": "Part 2 — Context",
+      "filename": "slide_06.html",
+      "file_path": "presentations/uft-anatomy-of-a-prompt/slide_06.html",
+      "created_at": "2026-06-16T00:00:00.000Z"
+    },
+    "7": {
+      "title": "Part 3 — Task",
+      "filename": "slide_07.html",
+      "file_path": "presentations/uft-anatomy-of-a-prompt/slide_07.html",
+      "created_at": "2026-06-16T00:00:00.000Z"
+    },
+    "8": {
+      "title": "Part 4 — Format",
+      "filename": "slide_08.html",
+      "file_path": "presentations/uft-anatomy-of-a-prompt/slide_08.html",
+      "created_at": "2026-06-16T00:00:00.000Z"
+    },
+    "9": {
+      "title": "ChatGPT vs Claude vs Gemini",
+      "filename": "slide_09.html",
+      "file_path": "presentations/uft-anatomy-of-a-prompt/slide_09.html",
+      "created_at": "2026-06-16T00:00:00.000Z"
+    },
+    "10": {
+      "title": "Putting It Together — Key Takeaways",
+      "filename": "slide_10.html",
+      "file_path": "presentations/uft-anatomy-of-a-prompt/slide_10.html",
+      "created_at": "2026-06-16T00:00:00.000Z"
+    }
+  },
+  "created_at": "2026-06-16T00:00:00.000Z",
+  "updated_at": "2026-06-16T00:00:00.000Z"
+}

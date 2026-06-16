@@ -1,0 +1,25 @@
+// Prisma schema for the UFT Learning Lounge community Q&A.
+// Run `npm run db:push` (after setting DATABASE_URL) to create the table.
+
+generator client {
+  provider      = "prisma-client-js"
+  // "native" for local dev; the rhel target is what Vercel's serverless runtime uses.
+  binaryTargets = ["native", "rhel-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model CommunityQuestion {
+  id         Int      @id @default(autoincrement())
+  name       String?
+  email      String?
+  question   String
+  answer     String?
+  aiAnswered Boolean  @default(false) @map("ai_answered")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@map("community_questions")
+}

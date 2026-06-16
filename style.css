@@ -91,7 +91,7 @@
   --color-border:          #363330;
   --color-text:            #e8e5df;
   --color-text-muted:      #918e84;
-  --color-text-faint:      #5c5950;
+  --color-text-faint:      #867f70;
   --color-text-inverse:    #1c1a17;
   --color-primary:         #e4c44e;
   --color-primary-hover:   #deb722;
@@ -101,7 +101,7 @@
   --color-accent:          #5bb8df;
   --color-accent-hover:    #3aa5d1;
   --color-accent-light:    rgba(91,184,223,0.12);
-  --color-uft:             #8ab4e8;
+  --color-uft:             #0a1c38;
   --color-uft-mid:         #4d8fd4;
   --color-uft-light:       rgba(138,180,232,0.12);
   --color-success:         #6daa45;
@@ -122,7 +122,7 @@
     --color-border:          #363330;
     --color-text:            #e8e5df;
     --color-text-muted:      #918e84;
-    --color-text-faint:      #5c5950;
+    --color-text-faint:      #867f70;
     --color-text-inverse:    #1c1a17;
     --color-primary:         #e4c44e;
     --color-primary-hover:   #deb722;
@@ -131,7 +131,7 @@
     --color-accent:          #5bb8df;
     --color-accent-hover:    #3aa5d1;
     --color-accent-light:    rgba(91,184,223,0.12);
-    --color-uft:             #8ab4e8;
+    --color-uft:             #0a1c38;
     --color-uft-mid:         #4d8fd4;
     --color-uft-light:       rgba(138,180,232,0.12);
     --color-success:         #6daa45;
@@ -575,3 +575,77 @@ button { cursor: pointer; background: none; border: none; }
 }
 .toast.show { transform: translateY(0); }
 .toast-icon { font-size: 20px; flex-shrink: 0; }
+
+/* ══════════════════════════════════════════════
+   NAV FIT — give the extra links room, collapse to
+   the hamburger sooner so links never cram or stack
+══════════════════════════════════════════════ */
+.site-nav .container { max-width: var(--content-wide); }
+.nav-links { gap: 2px; }
+.nav-links a { padding-inline: var(--space-3); white-space: nowrap; }
+
+/* Tight desktop band: trim padding + hide logo subtitle so it still fits */
+@media (min-width: 1025px) and (max-width: 1240px) {
+  .nav-links a { padding-inline: 10px; font-size: 0.84rem; }
+  .nav-logo-text span { display: none; }
+}
+
+/* Below 1024px → clean hamburger menu (was 768px, too late for 6 links) */
+@media (max-width: 1024px) {
+  .site-nav { position: relative; }
+  .nav-hamburger { display: flex; }
+  .nav-links-wrapper { display: none; }
+  .nav-links-wrapper.open {
+    display: block;
+    position: absolute; top: 100%; left: 0; right: 0;
+    background: var(--color-uft);
+    border-bottom: 2px solid var(--color-primary-mid);
+    padding: var(--space-4) var(--space-6); z-index: 99;
+    box-shadow: var(--shadow-lg);
+  }
+  .nav-links { flex-direction: column; align-items: stretch; gap: var(--space-1); }
+  .nav-links a { padding-block: var(--space-3); }
+  .nav-cta { text-align: center; margin-top: var(--space-2); }
+}
+
+/* ══════════════════════════════════════════════
+   ANNOUNCEMENT BAR — shared base (used by community/summer pages)
+══════════════════════════════════════════════ */
+.announcement-bar {
+  display: flex; align-items: center; justify-content: center;
+  gap: var(--space-3); flex-wrap: wrap; text-align: center;
+  background: var(--color-uft);
+  color: rgba(255,255,255,0.92);
+  font-size: var(--text-sm); font-weight: 500;
+  padding: var(--space-3) var(--space-6);
+  border-bottom: 1px solid rgba(255,255,255,0.10);
+}
+.announcement-bar > span:first-child { font-size: 1.1em; line-height: 1; }
+.announcement-bar a {
+  color: var(--color-primary-mid); font-weight: 700;
+  text-decoration: none; white-space: nowrap;
+}
+.announcement-bar a:hover { color: var(--color-primary); text-decoration: underline; }
+@media (max-width: 600px) {
+  .announcement-bar { padding: var(--space-2) var(--space-4); gap: 6px; font-size: 0.78rem; line-height: 1.35; }
+}
+
+/* ══════════════════════════════════════════════
+   DARK MODE POLISH
+══════════════════════════════════════════════ */
+[data-theme="dark"] {
+  /* lift surfaces a touch so cards/forms read against the page */
+  --color-surface:        #201d18;
+  --color-surface-2:      #27231d;
+  --color-surface-offset: #1d1a15;
+  --color-border:         #3a362f;
+}
+/* this badge previously used navy as its text colour — needs the light accent on dark */
+[data-theme="dark"] .badge-uft { color: var(--color-uft-mid); }
+/* subtle top highlight + crisp gold underline on the dark navy nav */
+[data-theme="dark"] .site-nav { box-shadow: inset 0 1px 0 rgba(255,255,255,0.05); }
+/* cards get a hair more definition in the dark */
+[data-theme="dark"] .card,
+[data-theme="dark"] .form-input,
+[data-theme="dark"] .form-textarea,
+[data-theme="dark"] .form-select { border-color: var(--color-border); }

@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ChatGPT vs Claude vs Gemini — UFT Comparison</title>
+  <link href="https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@500,700,800,900&f[]=satoshi@400,500,700&display=swap" rel="stylesheet"/>
+  <style>
+    :root{
+      --bg:#f5f2ee; --surface:#faf9f7; --surface2:#ffffff; --offset:#ede9e3;
+      --border:#d0cdc6; --divider:#dddbd5;
+      --text:#22201c; --muted:#7a776c; --faint:#b5b2aa;
+      --uft:#002855; --uft-mid:#0057a8;
+      --gold:#b8920e; --gold-hover:#8f710a; --gold-light:#fdf3d0; --gold-mid:#f0d060;
+      --sky:#1e8ab8; --sky-hover:#16699a; --sky-light:#d0ecf8;
+      --green:#3d7a1e; --green-light:#d4edca;
+      --font-display:'Cabinet Grotesk','Helvetica Neue',sans-serif;
+      --font-body:'Satoshi','Inter',sans-serif;
+      /* per-tool accents */
+      --c-gpt:#0f7a6b; --c-gpt-bg:#e3f3f0;
+      --c-claude:#b8602a; --c-claude-bg:#f7e9df;
+      --c-gemini:#2f63c4; --c-gemini-bg:#e2ebfb;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{
+      font-family:var(--font-body);background:var(--bg);color:var(--text);
+      line-height:1.65;padding:40px 28px;-webkit-font-smoothing:antialiased;
+    }
+    h1,h2,h3,h4{font-family:var(--font-display);line-height:1.12;}
+    .doc{max-width:1000px;margin:0 auto;display:flex;flex-direction:column;gap:24px;}
+
+    .topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;}
+    .back-link{
+      display:inline-flex;align-items:center;gap:8px;font-size:14px;font-weight:700;
+      color:var(--uft);text-decoration:none;padding:8px 16px;border-radius:9999px;
+      background:var(--surface2);border:1px solid var(--border);transition:border-color .2s,color .2s;
+    }
+    .back-link:hover{border-color:var(--gold);color:var(--gold-hover);}
+    .print-btn{
+      display:inline-flex;align-items:center;gap:8px;font-size:14px;font-weight:700;
+      color:var(--uft);text-decoration:none;cursor:pointer;padding:8px 16px;
+      border-radius:9999px;background:var(--gold-mid);border:none;
+    }
+    .print-btn:hover{background:var(--gold);}
+
+    .doc-header{
+      background:linear-gradient(135deg,var(--uft),var(--uft-mid));
+      color:#fff;border-radius:20px;padding:34px 40px;position:relative;overflow:hidden;
+    }
+    .doc-header::after{
+      content:'';position:absolute;top:-80px;right:-80px;width:340px;height:340px;
+      background:radial-gradient(ellipse,rgba(240,208,96,0.20) 0%,transparent 70%);
+    }
+    .brand-row{display:flex;align-items:center;gap:12px;margin-bottom:18px;position:relative;flex-wrap:wrap;}
+    .brand-mark{
+      width:40px;height:40px;border-radius:11px;background:var(--gold-mid);
+      display:flex;align-items:center;justify-content:center;flex-shrink:0;
+      font-family:var(--font-display);font-weight:900;font-size:20px;color:var(--uft);
+    }
+    .brand-name{font-family:var(--font-display);font-weight:800;font-size:16px;color:#fff;line-height:1.15;}
+    .brand-name span{display:block;font-size:12px;font-weight:500;color:rgba(255,255,255,0.65);}
+    .session-tag{
+      margin-left:auto;display:inline-flex;align-items:center;gap:7px;
+      background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.28);
+      border-radius:9999px;padding:5px 15px;font-size:12px;font-weight:700;
+      letter-spacing:.06em;text-transform:uppercase;color:var(--gold-mid);
+    }
+    .doc-header h1{position:relative;font-size:38px;font-weight:900;margin-bottom:8px;letter-spacing:-0.01em;}
+    .doc-header .lede{position:relative;font-size:17px;color:rgba(255,255,255,0.78);max-width:64ch;line-height:1.6;}
+
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:18px;overflow:hidden;}
+    .card-head{padding:20px 30px 16px;border-bottom:1px solid var(--divider);background:var(--surface2);}
+    .card-head h2{font-size:22px;font-weight:800;color:var(--uft);display:flex;align-items:center;gap:10px;}
+    .card-head p{font-size:14px;color:var(--muted);margin-top:3px;}
+    .card-body{padding:24px 30px;}
+
+    /* ── comparison table ── */
+    .table-wrap{overflow-x:auto;}
+    table.cmp{width:100%;border-collapse:separate;border-spacing:0;min-width:680px;}
+    .cmp th,.cmp td{padding:15px 18px;text-align:left;vertical-align:top;font-size:14.5px;line-height:1.55;border-bottom:1px solid var(--divider);}
+    .cmp thead th{
+      font-family:var(--font-display);font-size:17px;font-weight:800;color:#fff;
+      border-bottom:none;vertical-align:bottom;
+    }
+    .cmp thead .col-row{font-size:12px;text-transform:uppercase;letter-spacing:.1em;font-weight:700;color:var(--muted);}
+    .cmp thead .corner{background:transparent;}
+    .th-gpt{background:var(--c-gpt);border-top-left-radius:0;}
+    .th-claude{background:var(--c-claude);}
+    .th-gemini{background:var(--c-gemini);border-top-right-radius:0;}
+    .th-gpt .maker,.th-claude .maker,.th-gemini .maker{display:block;font-size:12px;font-weight:500;opacity:.85;margin-top:2px;}
+    .cmp tbody th{
+      font-family:var(--font-display);font-weight:700;font-size:13px;text-transform:uppercase;
+      letter-spacing:.06em;color:var(--uft);background:var(--offset);width:140px;white-space:nowrap;
+    }
+    .cmp tbody tr:nth-child(even) td{background:var(--surface2);}
+    .cmp tbody tr:last-child th,.cmp tbody tr:last-child td{border-bottom:none;}
+    .cmp .logo-cell{display:flex;align-items:center;gap:10px;margin-bottom:2px;}
+    .logo-chip{
+      width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;
+      font-family:var(--font-display);font-weight:900;font-size:15px;color:#fff;flex-shrink:0;
+    }
+    .col-gpt td.pillar{box-shadow:inset 3px 0 0 var(--c-gpt);}
+
+    /* ── guidance ── */
+    .guide-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;}
+    .guide-card{border:1px solid var(--border);border-radius:14px;overflow:hidden;background:var(--surface2);}
+    .guide-top{padding:13px 18px;color:#fff;display:flex;align-items:center;gap:10px;font-family:var(--font-display);font-weight:800;font-size:16px;}
+    .guide-top .gt-chip{width:28px;height:28px;border-radius:7px;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:14px;}
+    .gt-gpt{background:var(--c-gpt);}
+    .gt-claude{background:var(--c-claude);}
+    .gt-gemini{background:var(--c-gemini);}
+    .guide-card p{padding:15px 18px;font-size:14px;line-height:1.6;color:var(--text);}
+    .guide-card p b{color:var(--uft);}
+
+    .callout{
+      margin-top:20px;background:var(--gold-light);border:1px solid #ecd98a;
+      border-radius:13px;padding:18px 22px;display:flex;gap:14px;align-items:flex-start;
+    }
+    .callout .ic{font-size:22px;flex-shrink:0;}
+    .callout p{font-size:14.5px;line-height:1.6;color:#6b5407;}
+    .callout p b{color:#52410a;}
+
+    .fineprint{
+      background:var(--sky-light);border:1px solid #aedcf0;border-radius:13px;
+      padding:16px 22px;font-size:13.5px;line-height:1.6;color:#15506b;display:flex;gap:12px;align-items:flex-start;
+    }
+    .fineprint .ic{font-size:18px;flex-shrink:0;margin-top:1px;}
+
+    .doc-footer{background:var(--uft);color:rgba(255,255,255,0.65);border-radius:16px;padding:20px 30px;font-size:13px;text-align:center;}
+    .doc-footer strong{color:#fff;}
+
+    @media (max-width:760px){
+      .guide-grid{grid-template-columns:1fr;}
+      .doc-header h1{font-size:29px;}
+    }
+    @media print{
+      body{padding:0;background:#fff;}
+      .doc{gap:16px;max-width:100%;}
+      .no-print{display:none!important;}
+      .card{box-shadow:none!important;border-color:#cfcbc3;break-inside:avoid;}
+      .doc-header,.doc-footer,.cmp thead th,.guide-top,.callout,.fineprint{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+      .table-wrap{overflow:visible;}
+      table.cmp{min-width:0;}
+      .cmp th,.cmp td{padding:9px 12px;font-size:12px;}
+    }
+  </style>
+</head>
+<body>
+<div class="doc">
+
+  <div class="topbar no-print">
+    <a class="back-link" href="../../sessions.html">← Back to Sessions</a>
+    <button class="print-btn" onclick="window.print()">⎙ Print this page</button>
+  </div>
+
+  <header class="doc-header">
+    <div class="brand-row">
+      <div class="brand-mark">U</div>
+      <div class="brand-name">UFT Learning Lounge<span>Professional Learning</span></div>
+      <div class="session-tag">Session 1 · Anatomy of a Prompt</div>
+    </div>
+    <h1>ChatGPT vs. Claude vs. Gemini</h1>
+    <p class="lede">Three of the most widely used AI chat assistants, side by side. All three understand the same Role + Context + Task + Format prompt — this guide helps you pick where to start. Capabilities change fast, so treat this as a general orientation, not a spec sheet.</p>
+  </header>
+
+  <section class="card">
+    <div class="card-head">
+      <h2>📊 Side-by-Side Comparison</h2>
+      <p>General characteristics as of mid-2026. Exact features and limits shift often.</p>
+    </div>
+    <div class="card-body">
+      <div class="table-wrap">
+        <table class="cmp">
+          <thead>
+            <tr>
+              <th class="corner"></th>
+              <th class="th-gpt">
+                <span class="logo-cell"><span class="logo-chip" style="background:rgba(255,255,255,0.2)">G</span></span>
+                ChatGPT <span class="maker">by OpenAI</span>
+              </th>
+              <th class="th-claude">
+                <span class="logo-cell"><span class="logo-chip" style="background:rgba(255,255,255,0.2)">C</span></span>
+                Claude <span class="maker">by Anthropic</span>
+              </th>
+              <th class="th-gemini">
+                <span class="logo-cell"><span class="logo-chip" style="background:rgba(255,255,255,0.2)">◆</span></span>
+                Gemini <span class="maker">by Google</span>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th>Maker</th>
+              <td>OpenAI</td>
+              <td>Anthropic</td>
+              <td>Google</td>
+            </tr>
+            <tr>
+              <th>Strengths</th>
+              <td>Versatile all-rounder with a large feature set — image generation, voice, data analysis, and a big library of custom assistants.</td>
+              <td>Strong at long-form writing, careful reasoning, and following detailed instructions. Handles large documents well.</td>
+              <td>Deep integration with Google Search and Workspace (Docs, Gmail, Drive); strong at pulling in up-to-date information.</td>
+            </tr>
+            <tr>
+              <th>Best for</th>
+              <td>Brainstorming, quick drafts, a bit of everything, and trying out the newest features first.</td>
+              <td>Polished writing, editing, summarizing long PDFs, and tasks where tone and nuance matter.</td>
+              <td>Research grounded in current web results and work that lives inside Google Docs or Gmail.</td>
+            </tr>
+            <tr>
+              <th>Free access</th>
+              <td>Free tier available; the most capable models and higher limits require a paid plan.</td>
+              <td>Free tier available; advanced models and higher usage require a paid plan.</td>
+              <td>Free tier available; the most capable models and higher limits require a paid plan.</td>
+            </tr>
+            <tr>
+              <th>Personality &amp; tone</th>
+              <td>Friendly, energetic, and concise by default; quick to offer options and follow-ups.</td>
+              <td>Thoughtful, measured, and articulate; tends toward thorough, well-structured answers.</td>
+              <td>Direct and factual; leans on sourcing and links when answering questions.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="fineprint" style="margin-top:18px;">
+        <span class="ic">ℹ️</span>
+        <span>All three are excellent and improving constantly. Differences between them are usually smaller than the difference a well-structured prompt makes. The best tool is often the one already approved and available where you work.</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="card-head">
+      <h2>🧭 Which Should a UFT Staffer Use?</h2>
+      <p>A simple way to choose based on what you're doing.</p>
+    </div>
+    <div class="card-body">
+      <div class="guide-grid">
+        <div class="guide-card">
+          <div class="guide-top gt-gpt"><span class="gt-chip">G</span> Reach for ChatGPT</div>
+          <p>when you want a flexible, do-it-all assistant for <b>brainstorming, quick drafts, and exploring ideas</b> — or you want to try the newest AI features.</p>
+        </div>
+        <div class="guide-card">
+          <div class="guide-top gt-claude"><span class="gt-chip">C</span> Reach for Claude</div>
+          <p>when the writing has to be <b>polished and on-brand</b>, or you're working with <b>long documents</b> — member letters, reports, summarizing a long PDF, or careful editing.</p>
+        </div>
+        <div class="guide-card">
+          <div class="guide-top gt-gemini"><span class="gt-chip">◆</span> Reach for Gemini</div>
+          <p>when you need <b>current information from the web</b> or you're working <b>inside Google Docs or Gmail</b> and want AI right where your files already live.</p>
+        </div>
+      </div>
+
+      <div class="callout">
+        <span class="ic">⭐</span>
+        <p><b>The honest answer:</b> start with whatever your office already has access to. Learn one tool well using the 4-part framework before worrying about the rest — the prompting skills transfer directly to all three. And whichever you choose, <b>never paste confidential member data</b> (IDs, home addresses, anything private) into any AI tool.</p>
+      </div>
+    </div>
+  </section>
+
+  <footer class="doc-footer">
+    <strong>UFT Learning Lounge &bull; Anatomy of a Prompt — Tool Comparison</strong><br>
+    <span style="display:block;margin-top:5px;">Session 1 of the AI for UFT Staff series &bull; Claims are general and current as of 2026</span>
+  </footer>
+
+</div>
+</body>
+</html>

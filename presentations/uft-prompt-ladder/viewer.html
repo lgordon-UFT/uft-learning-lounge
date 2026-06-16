@@ -1,463 +1,435 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-vtheme="dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>The Prompt Ladder: A UFT Prompting Challenge</title>
+<link rel="preconnect" href="https://api.fontshare.com" crossorigin>
+<link href="https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@500,700,800,900&f[]=satoshi@400,500,700&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
   :root {
-    --bg: #09090b;
-    --surface: #18181b;
-    --border: #27272a;
-    --text: #e4e4e7;
-    --text-dim: #71717a;
-    --accent: #3b82f6;
-    --accent-dim: rgba(59, 130, 246, 0.12);
+    --navy-deep:  #060f20;
+    --navy:       #002855;
+    --navy-soft:  #0a2a52;
+    --gold:       #f0c64b;
+    --gold-warm:  #d4a017;
+    --sky:        #4bb6e8;
+    --text:       #eaf0f8;
+    --text-dim:   #8fa0bd;
+    --text-faint: #5a6b87;
+    --line:       rgba(255,255,255,0.10);
+    --glass:      rgba(13,24,46,0.72);
+    --stage-1:    #0a1730;
+    --stage-2:    #060d1d;
+    --font-display: 'Cabinet Grotesk', 'Helvetica Neue', sans-serif;
+    --font-body:    'Satoshi', system-ui, sans-serif;
+  }
+
+  [data-vtheme="light"] {
+    --navy-deep:  #e9e2d4;
+    --gold:       #b8920e;
+    --gold-warm:  #8f710a;
+    --text:       #22201c;
+    --text-dim:   #6f6c62;
+    --text-faint: #a7a399;
+    --line:       rgba(0,0,0,0.10);
+    --glass:      rgba(250,249,247,0.82);
+    --stage-1:    #efeae0;
+    --stage-2:    #e2dccf;
   }
 
   html, body {
     width: 100%; height: 100%;
     overflow: hidden;
-    background: var(--bg);
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    background: var(--stage-2);
+    font-family: var(--font-body);
     color: var(--text);
-    user-select: none;
-    -webkit-user-select: none;
+    user-select: none; -webkit-user-select: none;
   }
 
-  .viewer {
-    display: flex;
-    flex-direction: column;
-    width: 100vw;
-    height: 100vh;
-  }
+  .viewer { display: flex; flex-direction: column; width: 100vw; height: 100vh; position: relative; }
 
-  /* ── Stage ── */
+  /* ── Stage / theater ── */
   .stage {
-    flex: 1 1 0;
-    min-height: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    overflow: hidden;
+    flex: 1 1 0; min-height: 0;
+    display: flex; align-items: center; justify-content: center;
+    position: relative; overflow: hidden;
+    background:
+      radial-gradient(120% 80% at 50% -10%, var(--stage-1) 0%, var(--stage-2) 70%),
+      var(--stage-2);
+  }
+  /* gold ambient glow + grain */
+  .stage::before {
+    content: ""; position: absolute; inset: 0; pointer-events: none;
+    background: radial-gradient(60% 50% at 50% 0%, rgba(240,198,75,0.10), transparent 70%);
+    z-index: 0;
+  }
+  .stage::after {
+    content: ""; position: absolute; inset: 0; pointer-events: none; opacity: 0.035; z-index: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   }
 
-  /*
-    The wrapper is sized to the ACTUAL displayed pixel size (not 1920x1080).
-    JS sets --sw and --sh to the real rendered width/height.
-    Inside, the 1920x1080 iframe is scaled down via transform.
-  */
   .slide-frame-wrapper {
-    position: relative;
-    overflow: hidden;
-    border-radius: 6px;
+    position: relative; overflow: hidden; border-radius: 14px; z-index: 1;
+    background: #fff;
     box-shadow:
-      0 0 0 1px rgba(255,255,255,0.06),
-      0 8px 40px rgba(0,0,0,0.5),
-      0 30px 80px rgba(0,0,0,0.4);
+      0 0 0 1px rgba(255,255,255,0.08),
+      0 2px 8px rgba(0,0,0,0.4),
+      0 30px 70px rgba(0,0,0,0.55),
+      0 60px 120px rgba(0,0,0,0.35);
+  }
+  [data-vtheme="light"] .slide-frame-wrapper {
+    box-shadow: 0 0 0 1px rgba(0,0,0,0.06), 0 20px 50px rgba(40,40,30,0.22), 0 40px 90px rgba(40,40,30,0.12);
   }
 
   .slide-frame {
-    width: 1920px;
-    height: 1080px;
-    border: none;
-    display: block;
-    position: absolute;
-    top: 0; left: 0;
-    transform-origin: 0 0;
-    visibility: hidden;
+    width: 1920px; height: 1080px; border: none; display: block;
+    position: absolute; top: 0; left: 0; transform-origin: 0 0;
+    visibility: hidden; opacity: 0;
+    transition: opacity 0.28s ease, transform 0.4s cubic-bezier(0.16,1,0.3,1);
   }
+  .slide-frame.active { visibility: visible; opacity: 1; transition: opacity 0.32s ease 0.04s; }
 
-  .slide-frame.active { visibility: visible; }
+  /* shimmer while loading */
+  .slide-frame-wrapper.loading::after {
+    content: ""; position: absolute; inset: 0; z-index: 2;
+    background: linear-gradient(100deg, transparent 30%, rgba(255,255,255,0.5) 50%, transparent 70%);
+    background-size: 220% 100%; animation: shimmer 1.1s infinite;
+  }
+  @keyframes shimmer { from { background-position: 180% 0; } to { background-position: -60% 0; } }
 
-  /* ── Navigation overlays ── */
+  /* ── Click / hover nav zones ── */
   .nav-zone {
-    position: absolute;
-    top: 0; height: 100%;
-    width: 12%;
-    min-width: 60px;
-    display: flex;
-    align-items: center;
-    z-index: 10;
-    opacity: 0;
-    transition: opacity 0.2s;
-    cursor: pointer;
+    position: absolute; top: 0; height: 100%; width: 15%; min-width: 70px;
+    display: flex; align-items: center; z-index: 8; opacity: 0;
+    transition: opacity 0.2s; cursor: pointer;
   }
-
   .stage:hover .nav-zone { opacity: 1; }
-
-  .nav-zone--prev { left: 0; justify-content: flex-start; padding-left: 20px; }
-  .nav-zone--next { right: 0; justify-content: flex-end; padding-right: 20px; }
-
-  .nav-btn {
-    width: 44px; height: 44px;
-    border-radius: 50%;
-    background: rgba(0,0,0,0.5);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255,255,255,0.1);
+  .nav-zone--prev { left: 0; justify-content: flex-start; padding-left: 22px; }
+  .nav-zone--next { right: 0; justify-content: flex-end; padding-right: 22px; }
+  .nav-arrow {
+    width: 52px; height: 52px; border-radius: 50%;
+    background: var(--glass); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+    border: 1px solid var(--line); color: var(--text);
     display: flex; align-items: center; justify-content: center;
-    transition: all 0.15s;
-    color: rgba(255,255,255,0.8);
+    transition: transform 0.18s cubic-bezier(0.16,1,0.3,1), background 0.18s, box-shadow 0.18s;
   }
+  .nav-zone:hover .nav-arrow { transform: scale(1.12); background: rgba(240,198,75,0.18); box-shadow: 0 8px 26px rgba(0,0,0,0.4); color: var(--gold); }
+  .nav-arrow svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+  .nav-zone.disabled { opacity: 0 !important; pointer-events: none; }
 
-  .nav-btn:hover { background: rgba(0,0,0,0.7); color: #fff; transform: scale(1.1); }
-
-  .nav-btn svg {
-    width: 20px; height: 20px;
-    fill: none; stroke: currentColor; stroke-width: 2.5;
-    stroke-linecap: round; stroke-linejoin: round;
-  }
-
-  .nav-zone.disabled { pointer-events: none; }
-  .nav-zone.disabled .nav-btn { opacity: 0.15; }
-
-  /* ── Bottom bar ── */
-  .bottom-bar {
-    height: 48px; min-height: 48px;
+  /* ── Top bar ── */
+  .top-bar {
+    position: absolute; top: 0; left: 0; right: 0; z-index: 30;
     display: flex; align-items: center; justify-content: space-between;
-    padding: 0 16px;
-    background: var(--surface);
-    border-top: 1px solid var(--border);
-    z-index: 20;
-    gap: 12px;
+    padding: 16px 22px; gap: 16px;
+    background: linear-gradient(to bottom, rgba(6,13,29,0.55), transparent);
+    transition: opacity 0.3s, transform 0.3s; pointer-events: none;
+  }
+  [data-vtheme="light"] .top-bar { background: linear-gradient(to bottom, rgba(255,255,255,0.5), transparent); }
+  .top-bar > * { pointer-events: auto; }
+  .viewer.idle .top-bar { opacity: 0; transform: translateY(-6px); }
+
+  .brand { display: flex; align-items: center; gap: 11px; text-decoration: none; color: var(--text); }
+  .brand-mark {
+    width: 34px; height: 34px; border-radius: 9px;
+    background: linear-gradient(135deg, var(--gold), var(--gold-warm));
+    display: flex; align-items: center; justify-content: center; color: var(--navy-deep);
+    box-shadow: 0 4px 14px rgba(240,198,75,0.35); flex-shrink: 0;
+  }
+  .brand-mark svg { width: 19px; height: 19px; }
+  .brand-text { display: flex; flex-direction: column; line-height: 1.15; }
+  .brand-text b { font-family: var(--font-display); font-weight: 800; font-size: 14px; letter-spacing: -0.01em; }
+  .brand-text span { font-size: 10.5px; color: var(--text-dim); letter-spacing: 0.06em; text-transform: uppercase; }
+
+  .top-title {
+    flex: 1; min-width: 0; text-align: center;
+    font-family: var(--font-display); font-weight: 700; font-size: 14.5px;
+    color: var(--text-dim); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   }
 
-  .bottom-section {
-    display: flex; align-items: center; gap: 6px;
+  .top-right { display: flex; align-items: center; gap: 8px; }
+  .kicker {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--gold); padding: 5px 12px; border: 1px solid var(--line); border-radius: 999px;
+    background: rgba(240,198,75,0.08); white-space: nowrap;
   }
 
-  .bottom-section.left { flex: 1; min-width: 0; }
-  .bottom-section.center { flex: 0 0 auto; }
-  .bottom-section.right { flex: 1; min-width: 0; justify-content: flex-end; }
-
-  .slide-counter {
-    font-size: 13px; font-weight: 600;
-    color: var(--text);
-    font-variant-numeric: tabular-nums;
-    white-space: nowrap;
+  /* ── Bottom control dock ── */
+  .dock-wrap {
+    position: absolute; left: 0; right: 0; bottom: 0; z-index: 30;
+    display: flex; justify-content: center; padding: 0 0 22px;
+    transition: opacity 0.3s, transform 0.3s; pointer-events: none;
   }
-
-  .slide-counter .dim { color: var(--text-dim); font-weight: 400; }
-
-  .slide-title-display {
-    font-size: 12px; color: var(--text-dim);
-    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-    min-width: 0;
+  .viewer.idle .dock-wrap { opacity: 0; transform: translateY(10px); }
+  .dock {
+    pointer-events: auto;
+    display: flex; align-items: center; gap: 4px;
+    padding: 7px 9px; border-radius: 16px;
+    background: var(--glass); backdrop-filter: blur(20px) saturate(1.4); -webkit-backdrop-filter: blur(20px) saturate(1.4);
+    border: 1px solid var(--line);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.06);
   }
-
-  .pres-title {
-    font-size: 12px; font-weight: 500; color: var(--text-dim);
-    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-    min-width: 0;
+  .counter {
+    font-family: var(--font-display); font-weight: 700; font-size: 14px;
+    color: var(--text); font-variant-numeric: tabular-nums; white-space: nowrap;
+    padding: 0 10px; min-width: 64px; text-align: center;
   }
+  .counter .dim { color: var(--text-faint); font-weight: 500; }
+  .dock-sep { width: 1px; height: 22px; background: var(--line); margin: 0 4px; }
 
-  .sep { color: var(--border); font-size: 14px; }
-
-  /* ── Toolbar buttons ── */
   .tb {
-    width: 32px; height: 32px;
-    border-radius: 6px; border: none;
+    width: 38px; height: 38px; border-radius: 10px; border: none;
     background: transparent; color: var(--text-dim);
     display: flex; align-items: center; justify-content: center;
-    cursor: pointer; transition: all 0.12s; flex-shrink: 0;
+    cursor: pointer; transition: all 0.14s; flex-shrink: 0; position: relative;
+  }
+  .tb:hover { background: rgba(255,255,255,0.08); color: var(--text); }
+  [data-vtheme="light"] .tb:hover { background: rgba(0,0,0,0.06); }
+  .tb.active { background: rgba(240,198,75,0.16); color: var(--gold); }
+  .tb svg { width: 19px; height: 19px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .tb.primary { background: linear-gradient(135deg, var(--gold), var(--gold-warm)); color: var(--navy-deep); }
+  .tb.primary:hover { filter: brightness(1.08); transform: translateY(-1px); box-shadow: 0 6px 18px rgba(240,198,75,0.4); }
+
+  /* tooltip */
+  .tb[data-tip]:hover::after {
+    content: attr(data-tip); position: absolute; bottom: calc(100% + 10px); left: 50%; transform: translateX(-50%);
+    background: var(--navy-deep); color: var(--text); font-family: var(--font-body); font-size: 11px; font-weight: 600;
+    padding: 5px 9px; border-radius: 7px; white-space: nowrap; border: 1px solid var(--line);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.4); pointer-events: none;
   }
 
-  .tb:hover { background: rgba(255,255,255,0.07); color: var(--text); }
-  .tb.active { background: var(--accent-dim); color: var(--accent); }
-
-  .tb svg {
-    width: 16px; height: 16px;
-    fill: none; stroke: currentColor; stroke-width: 2;
-    stroke-linecap: round; stroke-linejoin: round;
+  /* ── Segmented progress ── */
+  .progress {
+    position: absolute; bottom: 0; left: 0; right: 0; height: 5px; z-index: 25;
+    display: flex; gap: 2px; padding: 0 2px;
+    transition: opacity 0.3s; cursor: pointer;
   }
+  .viewer.idle .progress { opacity: 0.5; }
+  .seg { flex: 1; height: 100%; background: var(--line); border-radius: 999px; transition: background 0.25s, transform 0.18s; transform-origin: bottom; }
+  .seg.done { background: linear-gradient(90deg, var(--gold-warm), var(--gold)); }
+  .seg.current { background: var(--gold); box-shadow: 0 0 12px rgba(240,198,75,0.6); }
+  .progress:hover .seg { transform: scaleY(1.8); }
 
-  /* ── Progress bar ── */
-  .progress-track {
-    position: absolute; bottom: 48px; left: 0; right: 0;
-    height: 3px; background: rgba(255,255,255,0.04);
-    z-index: 15; cursor: pointer;
-    transition: height 0.15s;
+  /* ── Overview grid overlay ── */
+  .overview {
+    position: fixed; inset: 0; z-index: 80;
+    background: var(--stage-2);
+    background-image: radial-gradient(120% 80% at 50% -10%, var(--stage-1), var(--stage-2) 70%);
+    display: flex; flex-direction: column;
+    opacity: 0; visibility: hidden; transition: opacity 0.3s; padding: 0;
   }
-
-  .progress-fill {
-    height: 100%; background: var(--accent);
-    transition: width 0.25s ease; border-radius: 0 1px 1px 0;
+  .overview.open { opacity: 1; visibility: visible; }
+  .ov-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 24px 40px 18px; border-bottom: 1px solid var(--line); flex-shrink: 0;
   }
-
-  .progress-track:hover { height: 6px; }
-
-  /* ── Thumbnail strip ── */
-  .thumb-strip {
-    position: absolute; bottom: 52px; left: 0; right: 0;
-    background: rgba(9,9,11,0.96);
-    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-    border-top: 1px solid var(--border);
-    padding: 14px 16px;
-    display: flex; gap: 10px;
-    overflow-x: auto; overflow-y: hidden;
-    z-index: 25;
-    transform: translateY(calc(100% + 52px)); opacity: 0;
-    transition: transform 0.25s ease, opacity 0.2s ease;
-    scrollbar-width: thin;
-    scrollbar-color: rgba(255,255,255,0.08) transparent;
+  .ov-head h2 { font-family: var(--font-display); font-weight: 800; font-size: 22px; letter-spacing: -0.01em; }
+  .ov-head h2 span { color: var(--text-dim); font-weight: 500; font-size: 15px; margin-left: 10px; }
+  .ov-grid {
+    flex: 1; overflow-y: auto;
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 24px; padding: 32px 40px 48px; align-content: start;
   }
-
-  .thumb-strip.open { transform: translateY(0); opacity: 1; }
-
-  .thumb-strip::-webkit-scrollbar { height: 3px; }
-  .thumb-strip::-webkit-scrollbar-track { background: transparent; }
-  .thumb-strip::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 2px; }
-
-  .thumb {
-    flex: 0 0 auto; width: 160px; height: 90px;
-    border-radius: 4px; overflow: hidden;
-    border: 2px solid transparent;
-    cursor: pointer; position: relative; background: #000;
-    transition: border-color 0.12s, transform 0.12s, box-shadow 0.12s;
+  .ov-grid::-webkit-scrollbar { width: 10px; }
+  .ov-grid::-webkit-scrollbar-thumb { background: var(--line); border-radius: 6px; border: 3px solid transparent; background-clip: content-box; }
+  .ov-card { cursor: pointer; display: flex; flex-direction: column; gap: 10px; }
+  .ov-thumb {
+    position: relative; aspect-ratio: 16/9; border-radius: 10px; overflow: hidden; background: #fff;
+    border: 2px solid transparent; transition: transform 0.18s cubic-bezier(0.16,1,0.3,1), border-color 0.18s, box-shadow 0.18s;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.4);
   }
-
-  .thumb:hover { border-color: rgba(255,255,255,0.2); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.4); }
-  .thumb.active { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent), 0 4px 16px rgba(59,130,246,0.2); }
-
-  .thumb iframe {
-    width: 1920px; height: 1080px; border: none;
-    transform: scale(calc(160 / 1920)); transform-origin: top left;
-    pointer-events: none;
+  .ov-card:hover .ov-thumb { transform: translateY(-4px); box-shadow: 0 14px 36px rgba(0,0,0,0.5); border-color: rgba(240,198,75,0.5); }
+  .ov-card.active .ov-thumb { border-color: var(--gold); box-shadow: 0 0 0 1px var(--gold), 0 10px 30px rgba(240,198,75,0.25); }
+  .ov-thumb iframe { width: 1920px; height: 1080px; border: none; transform-origin: top left; pointer-events: none; }
+  .ov-badge {
+    position: absolute; top: 8px; left: 8px; z-index: 2;
+    min-width: 24px; height: 24px; padding: 0 7px; border-radius: 7px;
+    background: rgba(6,13,29,0.82); color: #fff; font-family: var(--font-display); font-weight: 700; font-size: 12px;
+    display: flex; align-items: center; justify-content: center; backdrop-filter: blur(6px);
   }
-
-  .thumb-num {
-    position: absolute; top: 4px; left: 4px;
-    width: 20px; height: 20px; border-radius: 4px;
-    background: rgba(0,0,0,0.7);
-    font-size: 10px; font-weight: 600; color: rgba(255,255,255,0.7);
-    display: flex; align-items: center; justify-content: center;
-  }
-
-  .thumb.active .thumb-num { background: var(--accent); color: #fff; }
+  .ov-card.active .ov-badge { background: var(--gold); color: var(--navy-deep); }
+  .ov-label { font-size: 13px; color: var(--text-dim); line-height: 1.35; padding: 0 2px; }
+  .ov-card.active .ov-label { color: var(--text); font-weight: 600; }
 
   /* ── Help overlay ── */
-  .overlay-bg {
-    position: fixed; inset: 0;
-    background: rgba(0,0,0,0.6); z-index: 99;
-    display: none;
+  .scrim { position: fixed; inset: 0; background: rgba(6,13,29,0.6); backdrop-filter: blur(4px); z-index: 90; display: none; }
+  .scrim.open { display: block; }
+  .help {
+    position: fixed; top: 50%; left: 50%; transform: translate(-50%,-48%);
+    background: var(--glass); backdrop-filter: blur(24px); border: 1px solid var(--line);
+    border-radius: 18px; padding: 28px 32px; z-index: 91; display: none; min-width: 320px;
+    box-shadow: 0 30px 90px rgba(0,0,0,0.6); opacity: 0; transition: opacity 0.2s, transform 0.2s;
   }
-  .overlay-bg.open { display: block; }
-
-  .hints {
-    position: fixed; top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px; padding: 24px 32px;
-    z-index: 100; display: none; min-width: 300px;
-    box-shadow: 0 24px 80px rgba(0,0,0,0.6);
+  .help.open { display: block; opacity: 1; transform: translate(-50%,-50%); }
+  .help h3 { font-family: var(--font-display); font-weight: 800; font-size: 17px; margin-bottom: 18px; display: flex; align-items: center; gap: 9px; }
+  .help h3::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--gold); box-shadow: 0 0 10px var(--gold); }
+  .krow { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; gap: 28px; }
+  .kkeys { display: flex; gap: 5px; }
+  .kkey {
+    display: inline-flex; align-items: center; justify-content: center; min-width: 28px; height: 26px; padding: 0 7px;
+    border-radius: 7px; background: rgba(255,255,255,0.06); border: 1px solid var(--line);
+    font-family: var(--font-display); font-size: 12px; font-weight: 700; color: var(--text);
   }
+  [data-vtheme="light"] .kkey { background: rgba(0,0,0,0.05); }
+  .klabel { font-size: 13.5px; color: var(--text-dim); }
 
-  .hints.open { display: block; }
-
-  .hints h3 { font-size: 15px; font-weight: 600; margin-bottom: 16px; }
-
-  .hint-row { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; }
-  .hint-keys { display: flex; gap: 4px; }
-
-  .hint-key {
-    display: inline-flex; align-items: center; justify-content: center;
-    min-width: 26px; height: 24px; padding: 0 6px;
-    border-radius: 5px; background: rgba(255,255,255,0.06);
-    border: 1px solid rgba(255,255,255,0.1);
-    font-size: 11px; font-weight: 600; color: var(--text);
+  .viewer.fullscreen .progress { bottom: 0; }
+  @media (max-width: 640px) {
+    .top-title { display: none; }
+    .kicker { display: none; }
+    .dock { gap: 0; }
+    .tb { width: 34px; height: 34px; }
   }
-
-  .hint-label { font-size: 13px; color: var(--text-dim); margin-left: 20px; }
-
-  /* ── Fullscreen ── */
-  .viewer.fullscreen .bottom-bar { height: 0; min-height: 0; overflow: hidden; border: none; padding: 0; }
-  .viewer.fullscreen .progress-track { bottom: 0; opacity: 0; transition: opacity 0.2s; }
-  .viewer.fullscreen:hover .progress-track { opacity: 1; }
-  .viewer.fullscreen .thumb-strip { bottom: 4px; }
-
-  /* ── Slide transition ── */
-  .slide-frame { transition: visibility 0s 0.15s, opacity 0.15s ease; opacity: 0; }
-  .slide-frame.active { transition: visibility 0s 0s, opacity 0.2s ease; opacity: 1; }
 </style>
 </head>
 <body>
 
 <div class="viewer" id="viewer">
-  <div class="stage" id="stage">
-    <div class="slide-frame-wrapper" id="wrapper"></div>
+  <!-- TOP BAR -->
+  <div class="top-bar" id="topBar">
+    <a class="brand" href="../../sessions.html" title="Back to Sessions">
+      <span class="brand-mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+      </span>
+      <span class="brand-text"><b>Learning Lounge</b><span>UFT · Professional Learning</span></span>
+    </a>
+    <div class="top-title" id="topTitle"></div>
+    <div class="top-right">
+      <span class="kicker" id="kicker">Session 3 · The Prompt Ladder</span>
+    </div>
+  </div>
 
+  <!-- STAGE -->
+  <div class="stage" id="stage">
+    <div class="slide-frame-wrapper loading" id="wrapper"></div>
     <div class="nav-zone nav-zone--prev" id="navPrev" onclick="prev()">
-      <div class="nav-btn"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div>
+      <div class="nav-arrow"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div>
     </div>
     <div class="nav-zone nav-zone--next" id="navNext" onclick="next()">
-      <div class="nav-btn"><svg viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18"/></svg></div>
+      <div class="nav-arrow"><svg viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18"/></svg></div>
     </div>
   </div>
 
-  <div class="progress-track" id="progressTrack" onclick="onProgressClick(event)">
-    <div class="progress-fill" id="progressFill"></div>
-  </div>
-
-  <div class="thumb-strip" id="thumbStrip"></div>
-
-  <div class="bottom-bar" id="bottomBar">
-    <div class="bottom-section left">
-      <span class="pres-title" id="presTitle"></span>
-      <span class="sep">|</span>
-      <span class="slide-title-display" id="slideTitle"></span>
-    </div>
-    <div class="bottom-section center">
-      <button class="tb" onclick="prev()" title="Previous (←)">
-        <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
-      </button>
-      <span class="slide-counter" id="counter"></span>
-      <button class="tb" onclick="next()" title="Next (→)">
-        <svg viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18"/></svg>
-      </button>
-    </div>
-    <div class="bottom-section right">
-      <button class="tb" id="btnThumbs" onclick="toggleThumbs()" title="Thumbnails (T)">
-        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-      </button>
-      <button class="tb" id="btnFS" onclick="toggleFullscreen()" title="Fullscreen (F)">
-        <svg viewBox="0 0 24 24"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
-      </button>
-      <button class="tb" onclick="toggleHelp()" title="Help (?)">
-        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" /><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-      </button>
+  <!-- DOCK -->
+  <div class="dock-wrap">
+    <div class="dock">
+      <button class="tb" onclick="prev()" data-tip="Previous (←)"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
+      <span class="counter" id="counter"></span>
+      <button class="tb" onclick="next()" data-tip="Next (→)"><svg viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18"/></svg></button>
+      <span class="dock-sep"></span>
+      <button class="tb" id="btnOverview" onclick="toggleOverview()" data-tip="Overview (O)"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></button>
+      <button class="tb" id="btnTheme" onclick="toggleTheme()" data-tip="Theme (D)"><svg id="themeIcon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></button>
+      <button class="tb" onclick="toggleHelp()" data-tip="Shortcuts (?)"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></button>
+      <span class="dock-sep"></span>
+      <button class="tb primary" id="btnFS" onclick="toggleFullscreen()" data-tip="Present (F)"><svg viewBox="0 0 24 24"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg></button>
     </div>
   </div>
+
+  <!-- PROGRESS -->
+  <div class="progress" id="progress" onclick="onProgressClick(event)"></div>
 </div>
 
-<div class="overlay-bg" id="overlayBg" onclick="toggleHelp()"></div>
-<div class="hints" id="hints">
+<!-- OVERVIEW -->
+<div class="overview" id="overview">
+  <div class="ov-head">
+    <h2 id="ovTitle">All Slides <span id="ovCount"></span></h2>
+    <button class="tb" onclick="toggleOverview()" data-tip="Close (Esc)"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+  </div>
+  <div class="ov-grid" id="ovGrid"></div>
+</div>
+
+<!-- HELP -->
+<div class="scrim" id="scrim" onclick="closeOverlays()"></div>
+<div class="help" id="help">
   <h3>Keyboard Shortcuts</h3>
-  <div class="hint-row"><div class="hint-keys"><span class="hint-key">&rarr;</span><span class="hint-key">Space</span></div><span class="hint-label">Next slide</span></div>
-  <div class="hint-row"><div class="hint-keys"><span class="hint-key">&larr;</span></div><span class="hint-label">Previous slide</span></div>
-  <div class="hint-row"><div class="hint-keys"><span class="hint-key">Home</span></div><span class="hint-label">First slide</span></div>
-  <div class="hint-row"><div class="hint-keys"><span class="hint-key">End</span></div><span class="hint-label">Last slide</span></div>
-  <div class="hint-row"><div class="hint-keys"><span class="hint-key">F</span></div><span class="hint-label">Fullscreen</span></div>
-  <div class="hint-row"><div class="hint-keys"><span class="hint-key">T</span></div><span class="hint-label">Thumbnails</span></div>
-  <div class="hint-row"><div class="hint-keys"><span class="hint-key">Esc</span></div><span class="hint-label">Exit / close</span></div>
-  <div class="hint-row"><div class="hint-keys"><span class="hint-key">?</span></div><span class="hint-label">This help</span></div>
+  <div class="krow"><div class="kkeys"><span class="kkey">→</span><span class="kkey">Space</span></div><span class="klabel">Next slide</span></div>
+  <div class="krow"><div class="kkeys"><span class="kkey">←</span></div><span class="klabel">Previous slide</span></div>
+  <div class="krow"><div class="kkeys"><span class="kkey">Home</span><span class="kkey">End</span></div><span class="klabel">First / last slide</span></div>
+  <div class="krow"><div class="kkeys"><span class="kkey">O</span></div><span class="klabel">Slide overview</span></div>
+  <div class="krow"><div class="kkeys"><span class="kkey">F</span></div><span class="klabel">Present / fullscreen</span></div>
+  <div class="krow"><div class="kkeys"><span class="kkey">D</span></div><span class="klabel">Toggle theme</span></div>
+  <div class="krow"><div class="kkeys"><span class="kkey">Esc</span></div><span class="klabel">Exit / close</span></div>
 </div>
 
 <script>
-const PRESENTATION = {"title":"The Prompt Ladder: A UFT Prompting Challenge","slides":[{"number":1,"title":"The Prompt Ladder — Game Intro","filename":"slide_01.html"},{"number":2,"title":"How to Play","filename":"slide_02.html"},{"number":3,"title":"The Ladder — All 4 Levels at a Glance","filename":"slide_03.html"},{"number":4,"title":"LEVEL 1 — The Bare Ask","filename":"slide_04.html"},{"number":5,"title":"LEVEL 2 — Task + Context","filename":"slide_05.html"},{"number":6,"title":"LEVEL 3 — Context + Task + Format","filename":"slide_06.html"},{"number":7,"title":"LEVEL 4 — The Full Package (Expert)","filename":"slide_07.html"},{"number":8,"title":"Debrief — What Did We Learn?","filename":"slide_08.html"}]};
+const PRESENTATION = {"title":"The Prompt Ladder: A UFT Prompting Challenge","kicker":"Session 3 · The Prompt Ladder","slides":[{"number":1,"title":"The Prompt Ladder — Game Intro","filename":"slide_01.html"},{"number":2,"title":"How to Play","filename":"slide_02.html"},{"number":3,"title":"The Ladder — All 4 Levels at a Glance","filename":"slide_03.html"},{"number":4,"title":"LEVEL 1 — The Bare Ask","filename":"slide_04.html"},{"number":5,"title":"LEVEL 2 — Task + Context","filename":"slide_05.html"},{"number":6,"title":"LEVEL 3 — Context + Task + Format","filename":"slide_06.html"},{"number":7,"title":"LEVEL 4 — The Full Package (Expert)","filename":"slide_07.html"},{"number":8,"title":"Debrief — What Did We Learn?","filename":"slide_08.html"}]};
+
 const SLIDES = PRESENTATION.slides;
 const TOTAL = SLIDES.length;
-const SW = 1920;
-const SH = 1080;
-const RATIO = SW / SH;
+const SW = 1920, SH = 1080, RATIO = SW / SH;
 
-let current = 0;
-let thumbsOpen = false;
-let helpOpen = false;
-let iframes = [];
+let current = 0, overviewOpen = false, helpOpen = false, ovBuilt = false;
+let iframes = [], idleTimer = null;
 
 const $ = (id) => document.getElementById(id);
-const wrapper = $('wrapper');
-const stage = $('stage');
-const counter = $('counter');
-const slideTitle = $('slideTitle');
-const presTitle = $('presTitle');
-const progressFill = $('progressFill');
-const navPrev = $('navPrev');
-const navNext = $('navNext');
-const thumbStrip = $('thumbStrip');
-const btnThumbs = $('btnThumbs');
-const hints = $('hints');
-const overlayBg = $('overlayBg');
-const viewer = $('viewer');
+const viewer = $('viewer'), stage = $('stage'), wrapper = $('wrapper');
+const counter = $('counter'), topTitle = $('topTitle'), progress = $('progress');
+const navPrev = $('navPrev'), navNext = $('navNext'), overview = $('overview'), ovGrid = $('ovGrid');
+const help = $('help'), scrim = $('scrim');
 
 function init() {
-  presTitle.textContent = PRESENTATION.title || 'Presentation';
   document.title = PRESENTATION.title || 'Presentation';
+  if (PRESENTATION.kicker) $('kicker').textContent = PRESENTATION.kicker;
+  $('ovCount').textContent = '· ' + TOTAL + ' slides';
 
   SLIDES.forEach(function(slide, i) {
-    var iframe = document.createElement('iframe');
-    iframe.className = 'slide-frame';
-    iframe.src = slide.filename;
-    iframe.setAttribute('loading', i < 2 ? 'eager' : 'lazy');
-    iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin');
-    wrapper.appendChild(iframe);
-    iframes.push(iframe);
+    const f = document.createElement('iframe');
+    f.className = 'slide-frame';
+    f.src = slide.filename;
+    f.setAttribute('loading', i < 2 ? 'eager' : 'lazy');
+    f.setAttribute('sandbox', 'allow-scripts allow-same-origin');
+    if (i === 0) f.addEventListener('load', function(){ wrapper.classList.remove('loading'); }, { once: true });
+    wrapper.appendChild(f);
+    iframes.push(f);
 
-    var thumb = document.createElement('div');
-    thumb.className = 'thumb';
-    thumb.onclick = function() { goTo(i); };
-
-    var tIframe = document.createElement('iframe');
-    tIframe.src = slide.filename;
-    tIframe.setAttribute('loading', 'lazy');
-    tIframe.setAttribute('sandbox', 'allow-scripts allow-same-origin');
-    tIframe.setAttribute('tabindex', '-1');
-    thumb.appendChild(tIframe);
-
-    var num = document.createElement('div');
-    num.className = 'thumb-num';
-    num.textContent = i + 1;
-    thumb.appendChild(num);
-
-    thumbStrip.appendChild(thumb);
+    const seg = document.createElement('div');
+    seg.className = 'seg';
+    progress.appendChild(seg);
   });
+
+  // restore theme
+  try {
+    const saved = localStorage.getItem('viewer-theme');
+    if (saved) document.documentElement.setAttribute('data-vtheme', saved);
+  } catch(e){}
+  syncThemeIcon();
 
   goTo(0);
   rescale();
   window.addEventListener('resize', rescale);
+  armIdle();
 }
 
 function rescale() {
-  var isFS = viewer.classList.contains('fullscreen');
-  var barH = isFS ? 0 : 48;
-  var progressH = 3;
-
-  var stageRect = stage.getBoundingClientRect();
-  var availW = stageRect.width;
-  var availH = stageRect.height;
-
-  if (availW <= 0 || availH <= 0) {
-    availW = window.innerWidth;
-    availH = window.innerHeight - barH - progressH;
-  }
-
-  var pad = Math.min(availW, availH) * 0.03;
-  var innerW = availW - pad * 2;
-  var innerH = availH - pad * 2;
-
-  var scale;
-  if (innerW / innerH > RATIO) {
-    scale = innerH / SH;
-  } else {
-    scale = innerW / SW;
-  }
-
-  var displayW = Math.round(SW * scale);
-  var displayH = Math.round(SH * scale);
-
-  wrapper.style.width = displayW + 'px';
-  wrapper.style.height = displayH + 'px';
-
-  iframes.forEach(function(f) {
-    f.style.transform = 'scale(' + scale + ')';
-  });
+  const r = stage.getBoundingClientRect();
+  let availW = r.width || window.innerWidth;
+  let availH = r.height || window.innerHeight;
+  const pad = Math.min(availW, availH) * 0.045;
+  const innerW = availW - pad * 2, innerH = availH - pad * 2;
+  const scale = (innerW / innerH > RATIO) ? innerH / SH : innerW / SW;
+  const dw = Math.round(SW * scale), dh = Math.round(SH * scale);
+  wrapper.style.width = dw + 'px';
+  wrapper.style.height = dh + 'px';
+  iframes.forEach(function(f){ f.style.transform = 'scale(' + scale + ')'; });
 }
 
 function goTo(index) {
   if (index < 0 || index >= TOTAL) return;
+  const dir = index > current ? 1 : -1;
   current = index;
 
   iframes.forEach(function(f, i) {
+    const wasActive = f.classList.contains('active');
     f.classList.toggle('active', i === current);
+    if (i !== current && !wasActive) f.style.transform = f.style.transform; // no-op keep
   });
 
-  for (var offset = -1; offset <= 2; offset++) {
-    var idx = current + offset;
+  // preload neighbours
+  for (let o = -1; o <= 2; o++) {
+    const idx = current + o;
     if (idx >= 0 && idx < TOTAL && iframes[idx].getAttribute('loading') === 'lazy') {
       iframes[idx].removeAttribute('loading');
       iframes[idx].src = SLIDES[idx].filename;
@@ -465,92 +437,158 @@ function goTo(index) {
   }
 
   counter.innerHTML = (current + 1) + ' <span class="dim">/ ' + TOTAL + '</span>';
-  slideTitle.textContent = SLIDES[current].title || '';
-  progressFill.style.width = ((current + 1) / TOTAL * 100).toFixed(1) + '%';
-
+  topTitle.textContent = SLIDES[current].title || '';
   navPrev.classList.toggle('disabled', current === 0);
   navNext.classList.toggle('disabled', current === TOTAL - 1);
 
-  var thumbs = thumbStrip.querySelectorAll('.thumb');
-  thumbs.forEach(function(t, i) { t.classList.toggle('active', i === current); });
+  const segs = progress.children;
+  for (let i = 0; i < segs.length; i++) {
+    segs[i].classList.toggle('done', i < current);
+    segs[i].classList.toggle('current', i === current);
+  }
 
-  if (thumbsOpen && thumbs[current]) {
-    thumbs[current].scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+  if (ovBuilt) {
+    const cards = ovGrid.children;
+    for (let i = 0; i < cards.length; i++) cards[i].classList.toggle('active', i === current);
+    if (overviewOpen && cards[current]) cards[current].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
 }
 
 function next() { goTo(current + 1); }
 function prev() { goTo(current - 1); }
 
-function toggleThumbs() {
-  thumbsOpen = !thumbsOpen;
-  thumbStrip.classList.toggle('open', thumbsOpen);
-  btnThumbs.classList.toggle('active', thumbsOpen);
-  if (thumbsOpen) {
-    var thumbs = thumbStrip.querySelectorAll('.thumb');
-    if (thumbs[current]) thumbs[current].scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+function buildOverview() {
+  SLIDES.forEach(function(slide, i) {
+    const card = document.createElement('div');
+    card.className = 'ov-card';
+    card.onclick = function(){ goTo(i); toggleOverview(); };
+
+    const thumb = document.createElement('div');
+    thumb.className = 'ov-thumb';
+    const badge = document.createElement('div');
+    badge.className = 'ov-badge'; badge.textContent = i + 1;
+    const f = document.createElement('iframe');
+    f.src = slide.filename;
+    f.setAttribute('loading', 'lazy');
+    f.setAttribute('sandbox', 'allow-scripts allow-same-origin');
+    f.setAttribute('tabindex', '-1');
+    thumb.appendChild(badge); thumb.appendChild(f);
+
+    const label = document.createElement('div');
+    label.className = 'ov-label'; label.textContent = slide.title || ('Slide ' + (i+1));
+
+    card.appendChild(thumb); card.appendChild(label);
+    ovGrid.appendChild(card);
+  });
+  ovBuilt = true;
+  scaleOvThumbs();
+  window.addEventListener('resize', scaleOvThumbs);
+}
+
+function scaleOvThumbs() {
+  const thumbs = ovGrid.querySelectorAll('.ov-thumb');
+  thumbs.forEach(function(t){
+    const w = t.clientWidth;
+    if (w > 0) {
+      const f = t.querySelector('iframe');
+      f.style.transform = 'scale(' + (w / SW) + ')';
+    }
+  });
+}
+
+function toggleOverview() {
+  if (!ovBuilt) buildOverview();
+  overviewOpen = !overviewOpen;
+  overview.classList.toggle('open', overviewOpen);
+  $('btnOverview').classList.toggle('active', overviewOpen);
+  if (overviewOpen) {
+    requestAnimationFrame(scaleOvThumbs);
+    const cards = ovGrid.children;
+    if (cards[current]) cards[current].classList.add('active');
   }
 }
 
 function toggleFullscreen() {
-  if (!document.fullscreenElement) {
-    document.documentElement.requestFullscreen().catch(function(){});
-  } else {
-    document.exitFullscreen().catch(function(){});
-  }
+  if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(function(){});
+  else document.exitFullscreen().catch(function(){});
 }
-
 document.addEventListener('fullscreenchange', function() {
   viewer.classList.toggle('fullscreen', !!document.fullscreenElement);
   requestAnimationFrame(rescale);
 });
 
+function toggleTheme() {
+  const cur = document.documentElement.getAttribute('data-vtheme');
+  const nxt = cur === 'light' ? 'dark' : 'light';
+  document.documentElement.setAttribute('data-vtheme', nxt);
+  try { localStorage.setItem('viewer-theme', nxt); } catch(e){}
+  syncThemeIcon();
+}
+function syncThemeIcon() {
+  const light = document.documentElement.getAttribute('data-vtheme') === 'light';
+  $('themeIcon').innerHTML = light
+    ? '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.2" y1="4.2" x2="5.6" y2="5.6"/><line x1="18.4" y1="18.4" x2="19.8" y2="19.8"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.2" y1="19.8" x2="5.6" y2="18.4"/><line x1="18.4" y1="5.6" x2="19.8" y2="4.2"/>'
+    : '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+}
+
 function toggleHelp() {
   helpOpen = !helpOpen;
-  hints.classList.toggle('open', helpOpen);
-  overlayBg.classList.toggle('open', helpOpen);
+  help.classList.toggle('open', helpOpen);
+  scrim.classList.toggle('open', helpOpen);
+}
+function closeOverlays() {
+  if (helpOpen) toggleHelp();
 }
 
 function onProgressClick(e) {
-  var rect = e.currentTarget.getBoundingClientRect();
-  var pct = (e.clientX - rect.left) / rect.width;
-  goTo(Math.min(Math.floor(pct * TOTAL), TOTAL - 1));
+  const rect = e.currentTarget.getBoundingClientRect();
+  const pct = (e.clientX - rect.left) / rect.width;
+  goTo(Math.max(0, Math.min(Math.floor(pct * TOTAL), TOTAL - 1)));
+}
+
+function armIdle() {
+  const wake = function() {
+    viewer.classList.remove('idle');
+    document.body.style.cursor = '';
+    clearTimeout(idleTimer);
+    idleTimer = setTimeout(function() {
+      if (!overviewOpen && !helpOpen) {
+        viewer.classList.add('idle');
+        if (document.fullscreenElement) document.body.style.cursor = 'none';
+      }
+    }, 2600);
+  };
+  ['mousemove','mousedown','keydown','touchstart'].forEach(function(ev){ document.addEventListener(ev, wake, { passive: true }); });
+  wake();
 }
 
 document.addEventListener('keydown', function(e) {
   if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
   switch (e.key) {
-    case 'ArrowRight': case ' ': case 'ArrowDown':
+    case 'ArrowRight': case ' ': case 'ArrowDown': case 'PageDown':
       e.preventDefault(); next(); break;
-    case 'ArrowLeft': case 'ArrowUp':
+    case 'ArrowLeft': case 'ArrowUp': case 'PageUp':
       e.preventDefault(); prev(); break;
-    case 'Home':
-      e.preventDefault(); goTo(0); break;
-    case 'End':
-      e.preventDefault(); goTo(TOTAL - 1); break;
-    case 'f': case 'F':
-      e.preventDefault(); toggleFullscreen(); break;
-    case 't': case 'T':
-      e.preventDefault(); toggleThumbs(); break;
+    case 'Home': e.preventDefault(); goTo(0); break;
+    case 'End': e.preventDefault(); goTo(TOTAL - 1); break;
+    case 'f': case 'F': e.preventDefault(); toggleFullscreen(); break;
+    case 'o': case 'O': e.preventDefault(); toggleOverview(); break;
+    case 'd': case 'D': e.preventDefault(); toggleTheme(); break;
+    case '?': e.preventDefault(); toggleHelp(); break;
     case 'Escape':
       if (helpOpen) { toggleHelp(); e.preventDefault(); }
-      else if (thumbsOpen) { toggleThumbs(); e.preventDefault(); }
+      else if (overviewOpen) { toggleOverview(); e.preventDefault(); }
       break;
-    case '?':
-      e.preventDefault(); toggleHelp(); break;
+    default:
+      if (/^[0-9]$/.test(e.key)) { const n = e.key === '0' ? 9 : (+e.key - 1); if (n < TOTAL) goTo(n); }
   }
 });
 
-var touchX = 0, touchY = 0;
-stage.addEventListener('touchstart', function(e) {
-  touchX = e.touches[0].clientX; touchY = e.touches[0].clientY;
-}, { passive: true });
-stage.addEventListener('touchend', function(e) {
-  var dx = e.changedTouches[0].clientX - touchX;
-  var dy = e.changedTouches[0].clientY - touchY;
-  if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 50) {
-    dx < 0 ? next() : prev();
-  }
+let touchX = 0, touchY = 0;
+stage.addEventListener('touchstart', function(e){ touchX = e.touches[0].clientX; touchY = e.touches[0].clientY; }, { passive: true });
+stage.addEventListener('touchend', function(e){
+  const dx = e.changedTouches[0].clientX - touchX, dy = e.changedTouches[0].clientY - touchY;
+  if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 50) { dx < 0 ? next() : prev(); }
 }, { passive: true });
 
 init();

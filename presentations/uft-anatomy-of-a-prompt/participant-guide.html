@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Anatomy of a Prompt — Participant Guide</title>
+  <link href="https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@500,700,800,900&f[]=satoshi@400,500,700&display=swap" rel="stylesheet"/>
+  <style>
+    :root{
+      --bg:#f5f2ee; --surface:#faf9f7; --surface2:#ffffff; --offset:#ede9e3;
+      --border:#d0cdc6; --divider:#dddbd5;
+      --text:#22201c; --muted:#7a776c; --faint:#b5b2aa;
+      --uft:#002855; --uft-mid:#0057a8;
+      --gold:#b8920e; --gold-hover:#8f710a; --gold-light:#fdf3d0; --gold-mid:#f0d060;
+      --sky:#1e8ab8; --sky-hover:#16699a; --sky-light:#d0ecf8;
+      --green:#3d7a1e; --green-light:#d4edca;
+      --font-display:'Cabinet Grotesk','Helvetica Neue',sans-serif;
+      --font-body:'Satoshi','Inter',sans-serif;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{
+      font-family:var(--font-body);
+      background:var(--bg);
+      color:var(--text);
+      line-height:1.65;
+      padding:40px 28px;
+      -webkit-font-smoothing:antialiased;
+    }
+    h1,h2,h3,h4{font-family:var(--font-display);line-height:1.12;}
+
+    .doc{max-width:920px;margin:0 auto;display:flex;flex-direction:column;gap:24px;}
+
+    /* ── top bar ── */
+    .topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;}
+    .back-link{
+      display:inline-flex;align-items:center;gap:8px;
+      font-size:14px;font-weight:700;color:var(--uft);text-decoration:none;
+      padding:8px 16px;border-radius:9999px;background:var(--surface2);
+      border:1px solid var(--border);transition:border-color .2s,color .2s;
+    }
+    .back-link:hover{border-color:var(--gold);color:var(--gold-hover);}
+    .print-btn{
+      display:inline-flex;align-items:center;gap:8px;
+      font-size:14px;font-weight:700;color:var(--uft);text-decoration:none;cursor:pointer;
+      padding:8px 16px;border-radius:9999px;background:var(--gold-mid);border:none;
+    }
+    .print-btn:hover{background:var(--gold);}
+
+    /* ── brand header ── */
+    .doc-header{
+      background:linear-gradient(135deg,var(--uft),var(--uft-mid));
+      color:#fff;border-radius:20px;padding:34px 40px;position:relative;overflow:hidden;
+    }
+    .doc-header::after{
+      content:'';position:absolute;top:-80px;right:-80px;width:340px;height:340px;
+      background:radial-gradient(ellipse,rgba(240,208,96,0.20) 0%,transparent 70%);
+    }
+    .brand-row{display:flex;align-items:center;gap:12px;margin-bottom:18px;position:relative;}
+    .brand-mark{
+      width:40px;height:40px;border-radius:11px;background:var(--gold-mid);
+      display:flex;align-items:center;justify-content:center;flex-shrink:0;
+      font-family:var(--font-display);font-weight:900;font-size:20px;color:var(--uft);
+    }
+    .brand-name{font-family:var(--font-display);font-weight:800;font-size:16px;color:#fff;line-height:1.15;}
+    .brand-name span{display:block;font-size:12px;font-weight:500;color:rgba(255,255,255,0.65);}
+    .session-tag{
+      margin-left:auto;display:inline-flex;align-items:center;gap:7px;
+      background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.28);
+      border-radius:9999px;padding:5px 15px;font-size:12px;font-weight:700;
+      letter-spacing:.06em;text-transform:uppercase;color:var(--gold-mid);
+    }
+    .doc-header h1{position:relative;font-size:40px;font-weight:900;margin-bottom:8px;letter-spacing:-0.01em;}
+    .doc-header .lede{position:relative;font-size:17px;color:rgba(255,255,255,0.78);max-width:62ch;line-height:1.6;}
+
+    /* ── card ── */
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:18px;overflow:hidden;}
+    .card-head{padding:20px 30px 16px;border-bottom:1px solid var(--divider);background:var(--surface2);}
+    .card-head h2{font-size:22px;font-weight:800;color:var(--uft);display:flex;align-items:center;gap:10px;}
+    .card-head p{font-size:14px;color:var(--muted);margin-top:3px;}
+    .card-body{padding:26px 30px;}
+
+    .eyebrow{
+      display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:700;
+      text-transform:uppercase;letter-spacing:.1em;color:var(--gold);margin-bottom:6px;
+    }
+    .eyebrow::before{content:'';width:18px;height:2px;background:var(--gold);border-radius:2px;}
+
+    /* ── framework grid ── */
+    .fw-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+    .fw-card{
+      border:1px solid var(--border);border-radius:14px;overflow:hidden;background:var(--surface2);
+      display:flex;flex-direction:column;
+    }
+    .fw-top{display:flex;align-items:center;gap:14px;padding:16px 20px;color:#fff;}
+    .fw-letter{
+      width:42px;height:42px;border-radius:11px;background:rgba(255,255,255,0.18);
+      display:flex;align-items:center;justify-content:center;flex-shrink:0;
+      font-family:var(--font-display);font-weight:900;font-size:24px;
+    }
+    .fw-top h3{font-size:19px;font-weight:800;}
+    .fw-top .q{font-size:13px;opacity:.85;font-weight:500;margin-top:1px;}
+    .fw-body{padding:16px 20px;display:flex;flex-direction:column;gap:12px;flex:1;}
+    .fw-def{font-size:14.5px;color:var(--text);line-height:1.55;}
+    .fw-ex{
+      background:var(--offset);border-radius:10px;padding:11px 14px;
+      font-size:13.5px;color:var(--text);line-height:1.5;
+    }
+    .fw-ex .lbl{display:block;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:5px;}
+    .fw-ex em{font-style:italic;color:var(--uft-mid);}
+
+    .fw-role .fw-top{background:linear-gradient(135deg,#7a4f00,var(--gold-hover));}
+    .fw-context .fw-top{background:linear-gradient(135deg,var(--sky-hover),var(--sky));}
+    .fw-task .fw-top{background:linear-gradient(135deg,var(--uft),var(--uft-mid));}
+    .fw-format .fw-top{background:linear-gradient(135deg,#2a5e15,var(--green));}
+
+    /* ── before / after ── */
+    .ba-grid{display:grid;grid-template-columns:1fr auto 1fr;gap:18px;align-items:stretch;}
+    .ba-arrow{display:flex;align-items:center;justify-content:center;font-size:26px;color:var(--gold);font-weight:900;}
+    .ba-box{border-radius:14px;padding:18px 20px;border:1px solid;}
+    .ba-weak{background:#fdf1ee;border-color:#f0c9bd;}
+    .ba-strong{background:var(--green-light);border-color:#a9d493;}
+    .ba-box h4{font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;display:flex;align-items:center;gap:7px;}
+    .ba-weak h4{color:#a23b1c;}
+    .ba-strong h4{color:#2a5e15;}
+    .ba-prompt{font-size:14.5px;line-height:1.6;color:var(--text);font-style:italic;}
+    .ba-strong .ba-prompt b{font-style:normal;font-weight:700;}
+    .ba-strong .hl-role{color:var(--gold-hover);}
+    .ba-strong .hl-ctx{color:var(--sky-hover);}
+    .ba-strong .hl-task{color:var(--uft-mid);}
+    .ba-strong .hl-fmt{color:var(--green);}
+    .ba-note{font-size:12.5px;color:var(--muted);margin-top:11px;line-height:1.5;}
+
+    /* ── skeleton ── */
+    .skeleton{
+      background:var(--uft);border-radius:14px;padding:22px 24px;color:#e7eef6;position:relative;
+      font-family:'SFMono-Regular',ui-monospace,'Cascadia Code',Consolas,monospace;
+      font-size:14px;line-height:1.85;
+    }
+    .skeleton .sk-line{display:block;}
+    .skeleton .sk-key{color:var(--gold-mid);font-weight:700;}
+    .skeleton .sk-fill{color:#9fc3ea;}
+    .copy-btn{
+      position:absolute;top:16px;right:16px;font-family:var(--font-body);
+      background:var(--gold-mid);color:var(--uft);border:none;border-radius:8px;
+      padding:6px 14px;font-size:12.5px;font-weight:700;cursor:pointer;
+    }
+    .copy-btn:hover{background:var(--gold);}
+    .skeleton-legend{
+      display:flex;flex-wrap:wrap;gap:14px;margin-top:14px;font-size:12.5px;color:var(--muted);
+    }
+    .skeleton-legend span{display:inline-flex;align-items:center;gap:6px;}
+    .dot{width:11px;height:11px;border-radius:3px;display:inline-block;}
+
+    .tips{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+    .tip{
+      background:var(--surface2);border:1px solid var(--border);border-radius:11px;
+      padding:13px 16px;font-size:13.5px;line-height:1.5;color:var(--text);
+    }
+    .tip b{color:var(--uft);}
+
+    /* ── footer ── */
+    .doc-footer{
+      background:var(--uft);color:rgba(255,255,255,0.65);border-radius:16px;
+      padding:20px 30px;font-size:13px;text-align:center;
+    }
+    .doc-footer strong{color:#fff;}
+
+    @media (max-width:720px){
+      .fw-grid,.tips{grid-template-columns:1fr;}
+      .ba-grid{grid-template-columns:1fr;}
+      .ba-arrow{transform:rotate(90deg);}
+      .doc-header h1{font-size:30px;}
+    }
+
+    @media print{
+      body{padding:0;background:#fff;}
+      .doc{gap:16px;max-width:100%;}
+      .no-print{display:none!important;}
+      .card,.fw-card{box-shadow:none!important;border-color:#cfcbc3;}
+      .doc-header,.doc-footer,.fw-top,.skeleton{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+      .card{break-inside:avoid;}
+      .fw-card{break-inside:avoid;}
+    }
+  </style>
+</head>
+<body>
+<div class="doc">
+
+  <div class="topbar no-print">
+    <a class="back-link" href="../../sessions.html">← Back to Sessions</a>
+    <button class="print-btn" onclick="window.print()">⎙ Print this card</button>
+  </div>
+
+  <!-- Header -->
+  <header class="doc-header">
+    <div class="brand-row">
+      <div class="brand-mark">U</div>
+      <div class="brand-name">UFT Learning Lounge<span>Professional Learning</span></div>
+      <div class="session-tag">Session 1 · Anatomy of a Prompt</div>
+    </div>
+    <h1>The 4-Part Prompt Framework</h1>
+    <p class="lede">A printable reference card. Great prompts aren't magic — they have four parts. Give the AI a <strong>Role</strong>, the <strong>Context</strong>, a clear <strong>Task</strong>, and the <strong>Format</strong> you want back. Keep this nearby every time you write one.</p>
+  </header>
+
+  <!-- Framework -->
+  <section class="card">
+    <div class="card-head">
+      <h2>🧩 The Four Parts</h2>
+      <p>Each one answers a question the AI would otherwise have to guess at.</p>
+    </div>
+    <div class="card-body">
+      <div class="fw-grid">
+
+        <div class="fw-card fw-role">
+          <div class="fw-top">
+            <div class="fw-letter">R</div>
+            <div><h3>Role</h3><div class="q">Who should the AI be?</div></div>
+          </div>
+          <div class="fw-body">
+            <p class="fw-def">Tell the AI what expert hat to wear. Naming a role sets the vocabulary, depth, and point of view it answers from.</p>
+            <div class="fw-ex">
+              <span class="lbl">Good example</span>
+              <em>"You are a veteran UFT chapter leader who explains member benefits in plain language."</em>
+            </div>
+          </div>
+        </div>
+
+        <div class="fw-card fw-context">
+          <div class="fw-top">
+            <div class="fw-letter">C</div>
+            <div><h3>Context</h3><div class="q">What does it need to know?</div></div>
+          </div>
+          <div class="fw-body">
+            <p class="fw-def">Give the background: who the audience is, why you need it, and any facts, tone, or constraints that matter.</p>
+            <div class="fw-ex">
+              <span class="lbl">Good example</span>
+              <em>"This is for newly hired teachers during open enrollment. Keep it warm and avoid jargon. Don't quote dues amounts."</em>
+            </div>
+          </div>
+        </div>
+
+        <div class="fw-card fw-task">
+          <div class="fw-top">
+            <div class="fw-letter">T</div>
+            <div><h3>Task</h3><div class="q">What exactly should it do?</div></div>
+          </div>
+          <div class="fw-body">
+            <p class="fw-def">State the one clear action you want, using a strong verb. Be specific — "draft," "summarize," "compare," "rewrite."</p>
+            <div class="fw-ex">
+              <span class="lbl">Good example</span>
+              <em>"Draft a short welcome email introducing three benefits new members get on day one."</em>
+            </div>
+          </div>
+        </div>
+
+        <div class="fw-card fw-format">
+          <div class="fw-top">
+            <div class="fw-letter">F</div>
+            <div><h3>Format</h3><div class="q">What should it look like?</div></div>
+          </div>
+          <div class="fw-body">
+            <p class="fw-def">Describe the shape of the answer: length, structure, and style — email, bullet list, table, FAQ, or numbered steps.</p>
+            <div class="fw-ex">
+              <span class="lbl">Good example</span>
+              <em>"Format as an email with a subject line and three short bullets. Keep it under 150 words."</em>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Weak vs Strong -->
+  <section class="card">
+    <div class="card-head">
+      <h2>⚖️ Weak Prompt vs. Strong Prompt</h2>
+      <p>Same goal, very different results. The strong version uses all four parts.</p>
+    </div>
+    <div class="card-body">
+      <div class="ba-grid">
+        <div class="ba-box ba-weak">
+          <h4>✕ Weak</h4>
+          <p class="ba-prompt">"Write an email about member benefits."</p>
+          <p class="ba-note">No role, no audience, no purpose, no shape. The AI fills the gaps with generic guesses — you'll spend more time editing than you saved.</p>
+        </div>
+        <div class="ba-arrow">→</div>
+        <div class="ba-box ba-strong">
+          <h4>✓ Strong</h4>
+          <p class="ba-prompt">
+            "<span class="hl-role"><b>You are a veteran UFT chapter leader</b> who writes in plain, warm language.</span>
+            <span class="hl-ctx">This goes to newly hired teachers during open enrollment; avoid jargon and don't quote dues amounts.</span>
+            <span class="hl-task">Draft a welcome email introducing three benefits members get on day one.</span>
+            <span class="hl-fmt">Format it as an email with a subject line and three short bullets, under 150 words.</span>"
+          </p>
+          <p class="ba-note">Role + Context + Task + Format, all present. The first draft comes back nearly ready to send.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Skeleton -->
+  <section class="card">
+    <div class="card-head">
+      <h2>📋 Fill-in Prompt Skeleton</h2>
+      <p>Copy this, swap in the bracketed parts, and paste it into any AI tool.</p>
+    </div>
+    <div class="card-body">
+      <div class="skeleton">
+        <button class="copy-btn no-print" onclick="copySkeleton()">Copy</button>
+        <code id="sk-text">
+<span class="sk-line"><span class="sk-key">Role:</span> You are a <span class="sk-fill">[expert role — e.g. UFT chapter leader, communications specialist]</span>.</span>
+<span class="sk-line"><span class="sk-key">Context:</span> This is for <span class="sk-fill">[audience]</span>. I need it because <span class="sk-fill">[purpose]</span>. Keep in mind <span class="sk-fill">[tone, facts, or rules to follow]</span>.</span>
+<span class="sk-line"><span class="sk-key">Task:</span> <span class="sk-fill">[Draft / Summarize / Compare / Rewrite]</span> <span class="sk-fill">[exactly what you want]</span>.</span>
+<span class="sk-line"><span class="sk-key">Format:</span> Return it as <span class="sk-fill">[email / bullet list / table / FAQ / numbered steps]</span>, about <span class="sk-fill">[length]</span>.</span>
+        </code>
+      </div>
+      <div class="skeleton-legend">
+        <span><span class="dot" style="background:var(--gold-hover)"></span> Role</span>
+        <span><span class="dot" style="background:var(--sky-hover)"></span> Context</span>
+        <span><span class="dot" style="background:var(--uft-mid)"></span> Task</span>
+        <span><span class="dot" style="background:var(--green)"></span> Format</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Quick tips -->
+  <section class="card">
+    <div class="card-head">
+      <h2>💡 Quick Tips</h2>
+      <p>Small habits that make a big difference.</p>
+    </div>
+    <div class="card-body">
+      <div class="tips">
+        <div class="tip"><b>Be specific.</b> "Newly hired teachers" beats "people." Concrete detail steers the answer.</div>
+        <div class="tip"><b>One task at a time.</b> If you need two things, ask for them in two separate prompts.</div>
+        <div class="tip"><b>Iterate.</b> The first answer is a draft. Reply with "make it shorter" or "warmer" to refine.</div>
+        <div class="tip"><b>Never paste private data.</b> Leave out member IDs, home addresses, and anything confidential.</div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="doc-footer">
+    <strong>UFT Learning Lounge &bull; Anatomy of a Prompt — Participant Guide</strong><br>
+    <span style="display:block;margin-top:5px;">Session 1 of the AI for UFT Staff series &bull; Role + Context + Task + Format</span>
+  </footer>
+
+</div>
+
+<script>
+  function copySkeleton(){
+    var t = document.getElementById('sk-text').innerText;
+    navigator.clipboard.writeText(t).then(function(){
+      var b = document.querySelector('.copy-btn');
+      var o = b.textContent; b.textContent='Copied ✓';
+      setTimeout(function(){ b.textContent=o; },1600);
+    });
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Build Your Own UFT Persona — Fill-in-the-Blank Template</title>
+<link href="https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@500,700,800,900&f[]=satoshi@400,500,700&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --bg:#f5f2ee; --surface:#faf9f7; --surface-2:#ffffff; --offset:#ede9e3;
+    --border:#d0cdc6; --divider:#dddbd5;
+    --text:#22201c; --muted:#7a776c; --faint:#b5b2aa;
+    --uft:#002855; --uft-mid:#0057a8;
+    --primary:#b8920e; --primary-hover:#8f710a; --primary-light:#fdf3d0; --primary-mid:#f0d060;
+    --accent:#1e8ab8;
+    --indigo:#6366f1; --indigo-bg:#eef0fe;
+    --blue:#2563eb;   --blue-bg:#e6effe;
+    --green:#0e9e6e;  --green-bg:#dcf6ec;
+    --amber:#d97706;  --amber-bg:#fcefda;
+    --magenta:#c026d3;--magenta-bg:#fbe7fd;
+    --font-display:'Cabinet Grotesk','Helvetica Neue',sans-serif;
+    --font-body:'Satoshi','Inter',sans-serif;
+    --font-mono:'SFMono-Regular',ui-monospace,'Cascadia Code','Consolas',monospace;
+    --radius:1rem; --radius-lg:1.5rem; --radius-sm:.5rem;
+    --shadow-md:0 4px 16px rgba(40,32,18,.10);
+    --shadow-lg:0 14px 44px rgba(40,32,18,.15);
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  html{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;}
+  body{font-family:var(--font-body);background:var(--bg);color:var(--text);line-height:1.65;padding:32px 24px 64px;}
+  h1,h2,h3,h4{font-family:var(--font-display);line-height:1.12;text-wrap:balance;}
+
+  .wrap{max-width:880px;margin:0 auto;}
+
+  .topbar{display:flex;align-items:center;justify-content:space-between;max-width:880px;margin:0 auto 20px;flex-wrap:wrap;gap:12px;}
+  .back-link{
+    display:inline-flex;align-items:center;gap:8px;
+    font-family:var(--font-display);font-weight:700;font-size:14px;color:var(--uft);text-decoration:none;
+    padding:8px 16px;border-radius:999px;background:var(--surface-2);border:1px solid var(--border);
+    transition:background .2s,border-color .2s,transform .2s;
+  }
+  .back-link:hover{background:var(--primary-light);border-color:var(--primary);transform:translateX(-2px);}
+  .print-btn{
+    display:inline-flex;align-items:center;gap:8px;
+    font-family:var(--font-display);font-weight:700;font-size:14px;color:var(--uft);
+    background:var(--primary);border:none;padding:9px 18px;border-radius:999px;cursor:pointer;transition:background .2s;
+  }
+  .print-btn:hover{background:var(--primary-hover);}
+
+  .page{background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);overflow:hidden;}
+
+  /* Header */
+  .head{background:linear-gradient(135deg,var(--uft),var(--uft-mid));color:#fff;padding:30px 40px;position:relative;overflow:hidden;}
+  .head::after{content:'';position:absolute;right:-60px;top:-60px;width:220px;height:220px;background:radial-gradient(circle,rgba(240,208,96,.22),transparent 70%);}
+  .brand{display:flex;align-items:center;gap:12px;margin-bottom:18px;}
+  .brand-mark{width:38px;height:38px;border-radius:10px;flex-shrink:0;background:var(--primary-mid);color:var(--uft);display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-weight:900;font-size:20px;}
+  .brand-text{font-family:var(--font-display);font-weight:800;font-size:15px;line-height:1.2;}
+  .brand-text span{display:block;font-size:11px;font-weight:500;color:rgba(255,255,255,.65);letter-spacing:.04em;}
+  .session-tag{position:relative;z-index:1;display:inline-flex;align-items:center;gap:7px;background:rgba(240,208,96,.18);border:1px solid rgba(240,208,96,.45);color:var(--primary-mid);font-family:var(--font-display);font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.08em;padding:5px 14px;border-radius:999px;margin-bottom:14px;}
+  .head h1{font-size:34px;font-weight:900;position:relative;z-index:1;}
+  .head .sub{font-size:15px;color:#a8d4ff;margin-top:8px;max-width:62ch;position:relative;z-index:1;}
+
+  .body{padding:34px 40px 40px;}
+  .lead{font-size:16px;color:var(--muted);margin-bottom:30px;border-left:3px solid var(--primary);padding-left:16px;}
+  .lead strong{color:var(--text);}
+
+  .section-eyebrow{display:inline-flex;align-items:center;gap:8px;font-family:var(--font-display);font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:var(--primary);margin-bottom:16px;}
+  .section-eyebrow::before{content:'';width:22px;height:2px;background:var(--primary);border-radius:2px;}
+
+  /* Element cards */
+  .elements{display:flex;flex-direction:column;gap:18px;margin-bottom:34px;}
+  .el{
+    border:1.5px solid var(--border);border-left-width:6px;border-radius:var(--radius);
+    background:var(--surface);padding:20px 22px;
+  }
+  .el-top{display:flex;align-items:center;gap:12px;margin-bottom:8px;}
+  .el-num{
+    width:32px;height:32px;border-radius:9px;flex-shrink:0;color:#fff;
+    font-family:var(--font-display);font-weight:900;font-size:16px;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .el-name{font-family:var(--font-display);font-weight:800;font-size:18px;}
+  .el-explain{font-size:14px;color:var(--muted);margin-bottom:14px;}
+  .el-prompt{
+    background:var(--surface-2);border:1.5px dashed var(--border);border-radius:var(--radius-sm);
+    padding:12px 14px;font-family:var(--font-mono);font-size:13px;color:var(--text);
+    line-height:1.7;
+  }
+  .el-prompt .blank{color:var(--faint);}
+  .el-hint{
+    display:flex;align-items:flex-start;gap:7px;margin-top:11px;
+    font-size:13px;color:var(--muted);
+  }
+  .el-hint .hint-tag{
+    flex-shrink:0;font-family:var(--font-display);font-weight:700;font-size:10.5px;
+    text-transform:uppercase;letter-spacing:.05em;padding:2px 8px;border-radius:5px;
+  }
+  .el-hint em{font-style:normal;color:var(--text);}
+
+  /* per-element colors */
+  .el.indigo{border-left-color:var(--indigo);}  .el.indigo .el-num{background:var(--indigo);}  .el.indigo .el-name{color:var(--indigo);}  .el.indigo .hint-tag{background:var(--indigo-bg);color:var(--indigo);}
+  .el.blue{border-left-color:var(--blue);}      .el.blue .el-num{background:var(--blue);}      .el.blue .el-name{color:var(--blue);}      .el.blue .hint-tag{background:var(--blue-bg);color:var(--blue);}
+  .el.green{border-left-color:var(--green);}    .el.green .el-num{background:var(--green);}    .el.green .el-name{color:var(--green);}    .el.green .hint-tag{background:var(--green-bg);color:var(--green);}
+  .el.amber{border-left-color:var(--amber);}    .el.amber .el-num{background:var(--amber);}    .el.amber .el-name{color:var(--amber);}    .el.amber .hint-tag{background:var(--amber-bg);color:var(--amber);}
+  .el.magenta{border-left-color:var(--magenta);}.el.magenta .el-num{background:var(--magenta);}.el.magenta .el-name{color:var(--magenta);}.el.magenta .hint-tag{background:var(--magenta-bg);color:var(--magenta);}
+
+  /* Skeleton copy box */
+  .skeleton-head{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px;}
+  .skeleton-head h2{font-size:21px;font-weight:800;color:var(--uft);}
+  .skeleton-head p{font-size:13.5px;color:var(--muted);margin-top:3px;}
+
+  .copy-wrap{position:relative;margin-bottom:24px;}
+  .copy-box{
+    background:#0f1c2e;border:1px solid #1d3354;border-radius:var(--radius);
+    padding:26px 26px 24px;font-family:var(--font-mono);font-size:13px;line-height:1.75;
+    color:#e8eef7;white-space:pre-wrap;overflow-x:auto;box-shadow:var(--shadow-md);
+  }
+  .copy-box .label{display:block;font-weight:700;margin:14px 0 2px;}
+  .copy-box .label:first-child{margin-top:0;}
+  .copy-box .l-indigo{color:#a5b4fc;} .copy-box .l-blue{color:#93c5fd;}
+  .copy-box .l-green{color:#6ee7b7;}  .copy-box .l-amber{color:#fcd34d;} .copy-box .l-magenta{color:#f0abfc;}
+  .copy-box .fill{color:#cbd5e1;font-style:italic;}
+
+  .copy-btn{
+    position:absolute;top:14px;right:14px;display:inline-flex;align-items:center;gap:7px;
+    font-family:var(--font-display);font-weight:700;font-size:13px;background:var(--primary-mid);color:var(--uft);
+    border:none;padding:8px 16px;border-radius:999px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.25);
+    transition:background .2s,transform .15s;
+  }
+  .copy-btn:hover{background:#f5dd7a;} .copy-btn:active{transform:scale(.96);}
+  .copy-btn.copied{background:var(--green);color:#fff;}
+
+  .tip{
+    background:var(--primary-light);border:1px solid var(--primary-mid);border-radius:var(--radius);
+    padding:16px 20px;font-size:14px;color:#6b5407;display:flex;gap:11px;align-items:flex-start;
+  }
+  .tip strong{font-family:var(--font-display);}
+  .tip .tip-mark{font-size:18px;flex-shrink:0;}
+
+  .footnote{margin-top:28px;text-align:center;font-size:12.5px;color:var(--faint);font-family:var(--font-display);font-weight:500;letter-spacing:.02em;}
+
+  .toast{
+    position:fixed;bottom:26px;left:50%;transform:translate(-50%,140%);
+    background:var(--uft);color:#fff;font-family:var(--font-display);font-weight:700;font-size:14px;
+    padding:12px 22px;border-radius:999px;box-shadow:var(--shadow-lg);
+    display:flex;align-items:center;gap:9px;z-index:999;transition:transform .35s cubic-bezier(.16,1,.3,1);
+  }
+  .toast.show{transform:translate(-50%,0);}
+  .toast::before{content:'✓';color:var(--primary-mid);font-size:16px;}
+
+  @media (max-width:640px){
+    body{padding:18px 12px 48px;}
+    .head{padding:24px 22px;} .head h1{font-size:26px;}
+    .body{padding:24px 22px 30px;}
+    .copy-box{font-size:12px;padding:20px 18px;}
+    .copy-btn{position:static;margin-bottom:14px;}
+    .copy-wrap{display:flex;flex-direction:column;}
+  }
+
+  @media print{
+    body{background:#fff;padding:0;color:#000;}
+    .topbar,.print-btn,.back-link,.copy-btn,.toast{display:none !important;}
+    .page{box-shadow:none;border:none;border-radius:0;}
+    .head{background:var(--uft) !important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+    .head::after{display:none;}
+    .el,.tip{-webkit-print-color-adjust:exact;print-color-adjust:exact;page-break-inside:avoid;}
+    .copy-box{background:#fff !important;color:#111 !important;border:1.5px solid #888;-webkit-print-color-adjust:exact;print-color-adjust:exact;page-break-inside:avoid;}
+    .copy-box .l-indigo{color:#4338ca !important;} .copy-box .l-blue{color:#1d4ed8 !important;}
+    .copy-box .l-green{color:#047857 !important;}  .copy-box .l-amber{color:#b45309 !important;} .copy-box .l-magenta{color:#a21caf !important;}
+    .copy-box .fill{color:#444 !important;}
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <a class="back-link" href="../../sessions.html">&larr; Back to Sessions</a>
+  <button class="print-btn" onclick="window.print()">⎙ Print this page</button>
+</div>
+
+<div class="wrap">
+<div class="page">
+
+  <div class="head">
+    <div class="brand">
+      <div class="brand-mark">U</div>
+      <div class="brand-text">UFT Learning Lounge<span>Professional Learning</span></div>
+    </div>
+    <div class="session-tag">● Session 2 · AI Personas</div>
+    <h1>Build Your Own UFT Persona</h1>
+    <p class="sub">A fill-in-the-blank template for any UFT department or role. Work through the 5 elements, then copy the skeleton at the bottom and make it your own.</p>
+  </div>
+
+  <div class="body">
+
+    <p class="lead">A <strong>persona</strong> is a reusable block of instructions you paste into ChatGPT or Claude once, so it knows who to be every time. Fill in the five blanks below for <strong>your</strong> role — a chapter leader, a benefits office, a school secretary, anyone. There are no wrong answers; specificity is what makes it work.</p>
+
+    <div class="section-eyebrow">The 5 building blocks</div>
+
+    <div class="elements">
+
+      <!-- 1 -->
+      <div class="el indigo">
+        <div class="el-top"><div class="el-num">1</div><div class="el-name">Role &amp; Identity</div></div>
+        <p class="el-explain">Who is the AI? Give it a job title and a one-line mission.</p>
+        <div class="el-prompt">You are the <span class="blank">[____________________________]</span>, who helps with <span class="blank">[____________________________]</span>.</div>
+        <div class="el-hint"><span class="hint-tag">Example</span><em>"You are the UFT Benefits Navigator, who helps members understand their Welfare Fund coverage."</em></div>
+      </div>
+
+      <!-- 2 -->
+      <div class="el blue">
+        <div class="el-top"><div class="el-num">2</div><div class="el-name">Knowledge Base</div></div>
+        <p class="el-explain">What should it know? List the topics, programs, and context it draws on.</p>
+        <div class="el-prompt">You know about <span class="blank">[____________________________________________]</span>, and you understand the NYC public-school context.</div>
+        <div class="el-hint"><span class="hint-tag">Example</span><em>"…dental and vision claims, reimbursement timelines, how to file online, and which forms to use."</em></div>
+      </div>
+
+      <!-- 3 -->
+      <div class="el green">
+        <div class="el-top"><div class="el-num">3</div><div class="el-name">Audience</div></div>
+        <p class="el-explain">Who is it talking to? Name the people and assume their reading level and needs.</p>
+        <div class="el-prompt">You are speaking with <span class="blank">[____________________________]</span>, who want <span class="blank">[____________________]</span>.</div>
+        <div class="el-hint"><span class="hint-tag">Example</span><em>"…recently retired UFT members, who want clear, step-by-step answers without jargon."</em></div>
+      </div>
+
+      <!-- 4 -->
+      <div class="el amber">
+        <div class="el-top"><div class="el-num">4</div><div class="el-name">Tone &amp; Voice</div></div>
+        <p class="el-explain">How should it sound? Pick a few adjectives and a style rule.</p>
+        <div class="el-prompt">Be <span class="blank">[________, ________, and ________]</span>. Use <span class="blank">[plain language / short paragraphs / …]</span>.</div>
+        <div class="el-hint"><span class="hint-tag">Example</span><em>"Be warm, patient, and pro-worker. Use plain language and lead with the answer."</em></div>
+      </div>
+
+      <!-- 5 -->
+      <div class="el magenta">
+        <div class="el-top"><div class="el-num">5</div><div class="el-name">Goals &amp; Guardrails</div></div>
+        <p class="el-explain">What is it for — and what must it never do? Set the mission and the limits.</p>
+        <div class="el-prompt">Your goal is to <span class="blank">[____________________]</span>. Never <span class="blank">[____________________]</span>. For <span class="blank">[case-specific issues]</span>, direct people to <span class="blank">[____________________]</span>.</div>
+        <div class="el-hint"><span class="hint-tag">Example</span><em>"…never give binding legal advice; for a specific claim, direct them to the Welfare Fund at 212-539-0500."</em></div>
+      </div>
+
+    </div>
+
+    <!-- Skeleton -->
+    <div class="skeleton-head">
+      <div>
+        <h2>Your copy-and-edit skeleton</h2>
+        <p>Copy this, paste it into ChatGPT Custom Instructions or a Claude Project, and replace every bracket.</p>
+      </div>
+    </div>
+
+    <div class="copy-wrap">
+      <button class="copy-btn" id="copyBtn" onclick="copySkeleton()">⧉ Copy skeleton</button>
+      <div class="copy-box" id="skeletonText"><span class="label l-indigo">ROLE &amp; IDENTITY</span>You are the <span class="fill">[ROLE / TITLE]</span>, a helpful assistant for the United Federation of Teachers. You help with <span class="fill">[WHAT YOU HELP WITH]</span>.
+
+<span class="label l-blue">KNOWLEDGE BASE</span>You are knowledgeable about <span class="fill">[KEY TOPICS, PROGRAMS, BENEFITS, FORMS, OFFICES]</span>. You understand the NYC public-school context: the DOE, chapter leaders, and the realities educators face.
+
+<span class="label l-green">AUDIENCE</span>You are speaking with <span class="fill">[WHO — e.g. teachers, paras, retirees, prospective members]</span>. Assume <span class="fill">[WHAT THEY WANT — e.g. quick, clear answers without jargon]</span>.
+
+<span class="label l-amber">TONE &amp; VOICE</span>Be <span class="fill">[3 ADJECTIVES — e.g. warm, clear, pro-worker]</span>. Use <span class="fill">[STYLE RULES — e.g. plain language, short paragraphs, answer first]</span>.
+
+<span class="label l-magenta">GOALS &amp; GUARDRAILS</span>Your goal is to <span class="fill">[MAIN GOAL]</span>. Always speak positively about the union. Never <span class="fill">[WHAT TO AVOID — e.g. give binding legal/medical/financial advice]</span>. For anything case-specific, direct the person to <span class="fill">[WHO TO ESCALATE TO + CONTACT]</span>. If unsure, say so and recommend confirming with UFT staff.</div>
+    </div>
+
+    <div class="tip">
+      <span class="tip-mark">💡</span>
+      <div><strong>Tip:</strong> The more specific your blanks, the better the AI. Swap a vague "members" for "first-year teachers in Brooklyn," and name real offices and phone numbers. Then test it with one real question and tweak.</div>
+    </div>
+
+    <p class="footnote">UFT Learning Lounge · Session 2 · AI Personas — template for training use. Always verify member-facing details against current UFT resources.</p>
+
+  </div>
+</div>
+</div>
+
+<div class="toast" id="toast">Skeleton copied to clipboard</div>
+
+<script>
+  function copySkeleton(){
+    var el = document.getElementById('skeletonText');
+    var text = el.innerText.replace(/\n{3,}/g,'\n\n').trim();
+    var btn = document.getElementById('copyBtn');
+    var toast = document.getElementById('toast');
+    function done(){
+      btn.classList.add('copied');
+      btn.textContent = '✓ Copied!';
+      toast.classList.add('show');
+      setTimeout(function(){
+        btn.classList.remove('copied');
+        btn.innerHTML = '⧉ Copy skeleton';
+        toast.classList.remove('show');
+      }, 1900);
+    }
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(done).catch(fallback);
+    } else { fallback(); }
+    function fallback(){
+      var ta = document.createElement('textarea');
+      ta.value = text; document.body.appendChild(ta); ta.select();
+      try{ document.execCommand('copy'); }catch(e){}
+      document.body.removeChild(ta); done();
+    }
+  }
+</script>
+
+</body>
+</html>

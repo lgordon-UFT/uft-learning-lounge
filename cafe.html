@@ -496,8 +496,10 @@
     <div class="nav-links-wrapper" id="navMenu">
       <ul class="nav-links" role="list">
         <li><a href="index.html">Home</a></li>
+        <li><a href="summer-sessions.html">Summer Sessions</a></li>
         <li><a href="sessions.html">Sessions</a></li>
         <li><a href="cafe.html" class="active">Question Café</a></li>
+        <li><a href="community.html">Community</a></li>
         <li><a href="#ask" class="nav-cta btn">☕ Ask a Question</a></li>
       </ul>
     </div>
@@ -1289,33 +1291,50 @@ If you have a CTE-specific question, a complex prompting situation, or something
     `;
   }
 
-  /* ── Process a user message ── */
-  function handleMessage(text) {
+  /* ── Conversation state + formatting ── */
+  const convo = [];
+  function escapeHtml(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, c =>
+      ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  }
+  function fmtReply(t) {
+    return escapeHtml(t)
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\n/g, '<br>');
+  }
+  /* ── Process a user message — Groq-powered, live only ── */
+  async function handleMessage(text) {
     if (!text.trim()) return;
 
-    // Hide quick replies after first real message
     quickReplies.style.display = 'none';
-
-    appendMsg('user', text);
+    appendMsg('user', escapeHtml(text));
+    convo.push({ role: 'user', content: text });
     agentSend.disabled = true;
-
-    // Typing delay: 600-1200ms for realism
-    const delay = 600 + Math.random() * 600;
     showTyping();
 
-    setTimeout(() => {
+    try {
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: convo.slice(-12) })
+      });
+      let data = null;
+      try { data = await res.json(); } catch (_) { /* non-JSON: API not deployed */ }
       removeTyping();
-      const result = findAnswer(text);
 
-      if (result.type === 'escalate') {
-        appendMsg('agent', buildEscalationCard(result.question));
+      if (res.ok && data && data.reply) {
+        convo.push({ role: 'assistant', content: data.reply });
+        appendMsg('agent', fmtReply(data.reply));
       } else {
-        appendMsg('agent', result.text);
+        appendMsg('agent', '⚠️ I’m having trouble reaching the assistant right now — please try again in a moment.');
       }
-
+    } catch (err) {
+      removeTyping();
+      appendMsg('agent', '⚠️ I’m having trouble connecting. Please check your connection and try again.');
+    } finally {
       agentSend.disabled = false;
       agentInput.focus();
-    }, delay);
+    }
   }
 
   /* ── Open / Close ── */
@@ -1328,7 +1347,7 @@ If you have a CTE-specific question, a complex prompting situation, or something
     // Inject welcome message on first open only
     if (agentMessages.children.length === 0) {
       appendMsg('agent', `Welcome to the <strong>Lounge Assistant</strong>! ☕<br><br>
-I'm here to answer your questions about AI, prompting, personas, and the 2026 UFT Summer Learning Lounge sessions.<br><br>
+I'm here to answer your questions about AI, prompting, personas, and the 2026 UFT Learning Lounge sessions.<br><br>
 What can I help you with today? You can type a question or tap one of the suggestions below.`);
     }
   }
