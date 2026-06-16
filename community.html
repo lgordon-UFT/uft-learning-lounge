@@ -280,6 +280,28 @@
   function esc(s) {
     return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   }
+  // Lightweight markdown → HTML (bold, italic, lists, code, paragraphs)
+  function md(text) {
+    const e = s => s.replace(/[&<>"]/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]));
+    const inl = s => e(s)
+      .replace(/\*\*([^*]+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/`([^`]+?)`/g, '<code style="background:var(--color-surface-offset);padding:1px 5px;border-radius:4px;font-size:.9em">$1</code>')
+      .replace(/(^|[^*])\*([^*\n]+?)\*(?!\*)/g, '$1<em>$2</em>');
+    const lines = String(text == null ? '' : text).split(/\r?\n/);
+    let out = '', list = null;
+    const close = () => { if (list) { out += (list === 'ul' ? '</ul>' : '</ol>'); list = null; } };
+    for (const raw of lines) {
+      const line = raw.trim();
+      if (!line) { close(); continue; }
+      const ul = line.match(/^[\*\-]\s+(.+)$/);
+      const ol = line.match(/^\d+[.)]\s+(.+)$/);
+      if (ul) { if (list !== 'ul') { close(); out += '<ul style="margin:.35em 0 .6em 1.2em;padding:0">'; list = 'ul'; } out += '<li style="margin:.25em 0">' + inl(ul[1]) + '</li>'; }
+      else if (ol) { if (list !== 'ol') { close(); out += '<ol style="margin:.35em 0 .6em 1.4em;padding:0">'; list = 'ol'; } out += '<li style="margin:.25em 0">' + inl(ol[1]) + '</li>'; }
+      else { close(); out += '<p style="margin:0 0 .6em">' + inl(line) + '</p>'; }
+    }
+    close();
+    return out;
+  }
   function timeAgo(iso) {
     if (!iso) return '';
     const d = (Date.now() - new Date(iso).getTime()) / 1000;
@@ -317,7 +339,7 @@
       if (!data) throw new Error('NO_API');
       if (!res.ok) throw new Error(data.error || 'Something went wrong.');
       answerBody.className = 'answer-body';
-      answerBody.textContent = data.answer || 'No answer returned.';
+      answerBody.innerHTML = md(data.answer || 'No answer returned.');
       if (data.aiConfigured === false) configNote.classList.add('show');
       form.reset();
       loadFeed();
@@ -354,7 +376,7 @@
           </div>
           <div class="a">
             <div class="badge-a">A</div>
-            <div class="a-text">${esc(q.answer)}</div>
+            <div class="a-text">${md(q.answer)}</div>
           </div>
         </div>`).join('');
     } catch (err) {

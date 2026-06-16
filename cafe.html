@@ -986,6 +986,29 @@
     });
   }
 
+  /* ── Lightweight markdown → HTML (bold, italic, lists, code, paragraphs) ── */
+  function md(text) {
+    const e = s => s.replace(/[&<>"]/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]));
+    const inl = s => e(s)
+      .replace(/\*\*([^*]+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/`([^`]+?)`/g, '<code style="background:var(--color-surface-offset);padding:1px 5px;border-radius:4px;font-size:.9em">$1</code>')
+      .replace(/(^|[^*])\*([^*\n]+?)\*(?!\*)/g, '$1<em>$2</em>');
+    const lines = String(text == null ? '' : text).split(/\r?\n/);
+    let out = '', list = null;
+    const close = () => { if (list) { out += (list === 'ul' ? '</ul>' : '</ol>'); list = null; } };
+    for (const raw of lines) {
+      const line = raw.trim();
+      if (!line) { close(); continue; }
+      const ul = line.match(/^[\*\-]\s+(.+)$/);
+      const ol = line.match(/^\d+[.)]\s+(.+)$/);
+      if (ul) { if (list !== 'ul') { close(); out += '<ul style="margin:.35em 0 .6em 1.2em;padding:0">'; list = 'ul'; } out += '<li style="margin:.25em 0">' + inl(ul[1]) + '</li>'; }
+      else if (ol) { if (list !== 'ol') { close(); out += '<ol style="margin:.35em 0 .6em 1.4em;padding:0">'; list = 'ol'; } out += '<li style="margin:.25em 0">' + inl(ol[1]) + '</li>'; }
+      else { close(); out += '<p style="margin:0 0 .6em">' + inl(line) + '</p>'; }
+    }
+    close();
+    return out;
+  }
+
   /* ── Ask form → real Groq answer via /api/ask ── */
   const askForm = document.getElementById('askForm');
   const toast   = document.getElementById('toast');
@@ -1040,7 +1063,7 @@
           '<div><strong style="font-family:var(--font-display)">Lounge Assistant</strong>' +
           '<div style="font-size:var(--text-xs);color:var(--color-text-faint)">AI-assisted answer' +
           (data.stored ? ' · saved to the community board' : '') + '</div></div></div>' +
-          '<div style="white-space:pre-wrap;line-height:1.65;color:var(--color-text);font-size:var(--text-base)">' + fmt(data.answer) + '</div>';
+          '<div style="line-height:1.65;color:var(--color-text);font-size:var(--text-base)">' + md(data.answer) + '</div>';
         if (toast) { toast.classList.add('show'); setTimeout(() => toast.classList.remove('show'), 4500); }
         if (window.loadCafeFeed) loadCafeFeed();
       } catch (err) {
@@ -1075,14 +1098,28 @@
         if (!items.length) { live.innerHTML = ''; return; }
         live.innerHTML =
           '<div style="font-size:var(--text-xs);font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-primary);margin-bottom:var(--space-4)">⚡ Live from the community</div>' +
-          items.map(q => `<article class="q-card" style="margin-bottom:var(--space-4)">
-            <div style="display:flex;gap:12px;align-items:center;margin-bottom:14px">
-              <div style="width:40px;height:40px;border-radius:50%;flex-shrink:0;background:var(--color-uft);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-family:var(--font-display)">${esc(initials(q.name))}</div>
-              <div><div style="font-weight:700">${esc(q.name || 'Anonymous')}</div><div style="font-size:var(--text-xs);color:var(--color-text-faint)">${ago(q.created_at)} · AI-answered</div></div>
+          items.map((q, i) => {
+            const cleanQ = String(q.question || '').replace(/^\s*\([^)]*\)\s*/, '').trim();
+            return `<article class="q-card answered" data-status="answered recent" tabindex="0">
+            <div class="q-card-meta">
+              <div class="q-avatar av-${(i % 4) + 1}">${esc(initials(q.name))}</div>
+              <div class="q-meta-text">
+                <div class="q-author">${esc(q.name || 'Anonymous')}</div>
+                <div class="q-dept">Asked in the Question Café</div>
+              </div>
+              <span class="q-time">${ago(q.created_at)}</span>
             </div>
-            <div style="font-weight:600;font-size:var(--text-base);margin-bottom:12px;line-height:1.5">${esc(q.question)}</div>
-            <div style="display:flex;gap:10px;align-items:flex-start"><div style="width:28px;height:28px;flex-shrink:0;border-radius:8px;background:var(--color-primary);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-family:var(--font-display);font-size:14px">A</div><div style="white-space:pre-wrap;color:var(--color-text-muted);font-size:var(--text-sm);line-height:1.6">${esc(q.answer)}</div></div>
-          </article>`).join('');
+            <p class="q-text">"${esc(cleanQ)}"</p>
+            <div class="q-answer-preview">
+              <div class="q-answer-label">✅ Top Answer</div>
+              <div class="q-answer-text">${md(q.answer)}<div style="margin-top:.5em;color:var(--color-text-faint)">— <strong>Lounge Assistant (AI)</strong></div></div>
+            </div>
+            <div class="q-card-footer">
+              <span class="q-answered-badge">✅ Answered</span>
+              <span class="badge badge-gold">AI</span>
+            </div>
+          </article>`;
+          }).join('');
       } catch (e) { /* API not reachable (local preview) — keep the static examples */ }
     };
     loadCafeFeed();
@@ -1380,11 +1417,7 @@ If you have a CTE-specific question, a complex prompting situation, or something
     return String(s == null ? '' : s).replace(/[&<>"']/g, c =>
       ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   }
-  function fmtReply(t) {
-    return escapeHtml(t)
-      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-      .replace(/\n/g, '<br>');
-  }
+  function fmtReply(t) { return md(t); }
   /* ── Process a user message — Groq-powered, live only ── */
   async function handleMessage(text) {
     if (!text.trim()) return;
